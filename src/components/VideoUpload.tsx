@@ -34,7 +34,12 @@ export default function VideoUpload() {
     }
   }
 
-  function handleSetFile(event: React.ChangeEvent<HTMLInputElement>) {}
+  function handleSetFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = event.target.files;
+    if (files?.length) {
+      setFile(files[0]);
+    }
+  }
 
   return (
     <>
