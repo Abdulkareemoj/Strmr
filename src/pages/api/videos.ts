@@ -2,12 +2,25 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import busboy from "busboy";
 import fs from "fs";
+import fileType from "file-type";
+import { pipeline } from "stream";
+import util from "util";
+import cloudinary from "cloudinary";
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const pipelinePromise = util.promisify(pipeline);
+
 function uploadVideoStream(req: NextApiRequest, res: NextApiResponse) {
   const bb = busboy({ headers: req.headers });
 
