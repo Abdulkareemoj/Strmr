@@ -1,33 +1,30 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import mongoose from 'mongoose';
-import { Video } from '../../models/video'; // Import your video model
+import type { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from "@prisma/client";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { q } = req.query;
+const prisma = new PrismaClient();
 
-  if (!q) {
-    res.status(400).json({ message: 'Missing query parameter: q' });
-    return;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
-  try {
-    // Connect to your MongoDB database
-    await mongoose.connect('mongodb://localhost:27017/myapp', {useNewUrlParser: true, useUnifiedTopology: true});
+  const { query } = req.query;
 
-    // Search for videos
-    const videos = await Video.find({
-      $or: [
-        { title: { $regex: q, $options: 'i' } },
-        { description: { $regex: q, $options: 'i' } },
+  if (!query) {
+    return res.status(400).json({ message: "Missing search query" });
+  }
+
+  const videos = await prisma.video.findMany({
+    where: {
+      OR: [
+        { title: { contains: query, mode: "insensitive" } },
+        { description: { contains: query, mode: "insensitive" } },
       ],
-    });
+    },
+  });
 
-    res.status(200).json(videos);
-  } catch (error) {
-    console.error('Error searching for videos:', error);
-    res.status(500).json({ message: 'Error searching for videos' });
-  }
-  else {
-    res.status(405).json({ error: 'Method not allowed' });
-  }
-}; 
+  res.status(200).json(videos);
+}
