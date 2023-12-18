@@ -1,4 +1,3 @@
-// pages/index.tsx
 import { useState, useEffect } from "react";
 
 export default function VideoList() {
@@ -34,3 +33,4 @@ export default function VideoList() {
     </div>
   );
 }
+export async function getServerSideProps() {}
