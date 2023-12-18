@@ -6,6 +6,11 @@ export default function VideoUpload() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+
+  const handleCheckBoxChange = (e: any) => {
+    setIsPublic(!isPublic);
+  };
 
   async function handleUpload() {
     const data = new FormData();
@@ -50,6 +55,11 @@ export default function VideoUpload() {
       <form action="POST" method="post">
         <label htmlFor="file"> File</label>
         <input type="file" id="file" accept=".mp4" onChange={handleSetFile} />
+        <input
+          type="checkbox"
+          checked={isPublic}
+          onChange={handleCheckBoxChange}
+        />
       </form>
       <button type="button" onClick={handleUpload}>
         Upload Video
