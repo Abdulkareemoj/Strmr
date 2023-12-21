@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { auth } from "@/lib/auth";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
