@@ -1,5 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+
+import { Input } from "./ui/input";
 
 export default function VideoUpload() {
   const [file, setFile] = useState<File | undefined>();
@@ -24,7 +28,7 @@ export default function VideoUpload() {
         total: number;
       }) {
         const percentComplete = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
       },
     };
@@ -48,22 +52,22 @@ export default function VideoUpload() {
 
   return (
     <>
-      <div>
+      <div className="">
         videoUpload {error && <p>{error}</p>}
         {uploading && <p>{progress}</p>}
       </div>
       <form action="POST" method="post">
-        <label htmlFor="file"> File</label>
-        <input type="file" id="file" accept=".mp4" onChange={handleSetFile} />
-        <input
+        <Label htmlFor="file"> File</Label>
+        <Input type="file" id="file" accept=".mp4" onChange={handleSetFile} />
+        <Input
           type="checkbox"
           checked={isPublic}
           onChange={handleCheckBoxChange}
         />
       </form>
-      <button type="button" onClick={handleUpload}>
+      <Button type="button" onClick={handleUpload}>
         Upload Video
-      </button>
+      </Button>
     </>
   );
 }
