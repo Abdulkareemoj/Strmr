@@ -1,4 +1,10 @@
+import { type Metadata } from "next";
 import { useState } from "react";
+
+export const metadata: Metadata = {
+  title: "Search",
+  description: "Search Page",
+};
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
