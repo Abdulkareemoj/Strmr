@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 
+export const metadata: Metadata = {
+  title: "Videos",
+  description: "Videos Page",
+};
 export default function VideoList() {
   const [videos, setVideos] = useState([]);
   const [page, setPage] = useState(1);
