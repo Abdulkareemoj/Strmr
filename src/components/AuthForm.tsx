@@ -6,7 +6,7 @@ import { Label } from "~/components/ui/label";
 import React from "react";
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
-//chnaged to type from interface
+//chnaged to interface from type
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
