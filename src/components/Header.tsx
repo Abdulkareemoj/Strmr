@@ -2,12 +2,13 @@ import Link from "next/link";
 
 import { siteConfig } from "~/lib/config";
 import { cn } from "~/lib/utils";
-import { CommandMenu } from "~/components/command-menu";
+import { CommandMenu } from "~/components/CommandMenu";
 import { Icons } from "~/components/ui/icons";
 import { MainNav } from "~/components/MainNav";
 import { MobileNav } from "~/components/MobileNav";
-import { ModeToggle } from "~/components/mode-toggle";
+import { ModeToggle } from "~/components/ModeToggle";
 import { buttonVariants } from "~/components/ui/button";
+
 export function Header() {
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
