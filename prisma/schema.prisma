@@ -15,11 +15,26 @@ datasource db {
 }
 
 model Video {
-    id          Int     @id @default(autoincrement())
-    title       String
-    description String
-    videoId     String
-    public      Boolean @default(true)
+    id           Int     @id @default(autoincrement())
+    title        String
+    description  String
+    videoId      String
+    public       Boolean @default(true)
+    url          String // URL of the video file
+    thumbnailUrl String // URL of the video thumbnail
+    duration     Int // Duration of the video in seconds
+    // Add any other fields you need
+}
+
+model Short {
+    id           Int     @id @default(autoincrement())
+    title        String
+    description  String
+    shortId      String
+    public       Boolean @default(true)
+    url          String // URL of the short video file
+    thumbnailUrl String // URL of the short video thumbnail
+    duration     Int // Duration of the short video in seconds
     // Add any other fields you need
 }
 
