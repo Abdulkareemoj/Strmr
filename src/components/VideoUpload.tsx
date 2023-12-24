@@ -51,6 +51,7 @@ export default function VideoUpload() {
   }
 
   return (
+    //make a dropdown to select whether upload is short  or video
     <>
       <div className="">
         videoUpload {error && <p>{error}</p>}
