@@ -40,34 +40,16 @@ interface DocsConfig {
 export const docsConfig: DocsConfig = {
   mainNav: [
     {
-      title: "Documentation",
-      href: "/docs",
+      title: "Search",
+      href: "/search",
     },
     {
-      title: "Components",
-      href: "/docs/components/accordion",
+      title: "Videos",
+      href: "videoslist",
     },
     {
-      title: "Themes",
-      href: "/themes",
-    },
-    {
-      title: "Examples",
-      href: "/examples",
-    },
-    {
-      title: "Figma",
-      href: "/docs/figma",
-    },
-    {
-      title: "GitHub",
-      href: "https://github.com/shadcn/ui",
-      external: true,
-    },
-    {
-      title: "Twitter",
-      href: "https://twitter.com/shadcn",
-      external: true,
+      title: "Upload",
+      href: "/upload",
     },
   ],
   sidebarNav: [
