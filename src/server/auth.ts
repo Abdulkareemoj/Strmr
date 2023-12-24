@@ -67,6 +67,13 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  pages: {
+    signIn: "/auth/signin", // a custom sign-in page
+    signOut: "/auth/signout", // a custom sign-out page
+    error: "/auth/error", // Error code passed in query string as ?error=
+    // verifyRequest: '/auth/verify-request', // (used for check email message)
+    // newUser: null // If set, new users will be directed here on first sign in
+  },
 };
 
 /**
