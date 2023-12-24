@@ -1,12 +1,11 @@
-import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { siteConfig } from "~/lib/config";
 import { Header } from "~/components/Header";
 import { Footer } from "~/components/Footer";
 import { cn } from "~/lib/utils";
-// import { ThemeProvider } from "~/components/providers";
-// import { ThemeSwitcher } from "~/components/theme-switcher";
+import { ThemeProvider } from "~/components/Provider";
 import Head from "next/head";
+// import { ThemeSwitcher } from "~/components/theme-switcher";
 
 export const metadata: Metadata = {
   title: {
@@ -56,32 +55,28 @@ export const metadata: Metadata = {
   manifest: `${siteConfig.url}/site.webmanifest`,
 };
 
-export default function Layout({ children }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <html lang="en" suppressHydrationWarning>
-        <Head children={undefined} />
-        <body
-          className={cn(
-            "bg-background min-h-screen font-sans antialiased",
-            // fontSans.variable,
-          )}
+    <html lang="en">
+      <Head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <body className={cn("bg-background min-h-screen font-sans antialiased")}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          {/* <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          > */}
-          <div className="relative flex min-h-screen flex-col">
-            <Header />
-            <div className="flex-1">{children}</div>
-            <Footer />
-          </div>
-          {/* </ThemeProvider>
-          <ThemeSwitcher /> */}
-        </body>
-      </html>
-    </>
+          <Header />
+          <main className="mx-auto max-w-3xl px-6 py-12 sm:px-6 sm:py-10 lg:py-10">
+            {children}
+          </main>
+          <Footer />
+        </ThemeProvider>
+        {/* <ThemeSwitcher /> */}
+      </body>
+    </html>
   );
 }
