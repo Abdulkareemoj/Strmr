@@ -1,17 +1,9 @@
-// import { type Metadata } from "next";
-// import VideoUpload from "~/components/VideoUpload";
-// export const metadata: Metadata = {
-//   title: "Upload",
-//   description: "Upload Page",
-// };
-// function Upload() {
-//   return (
-//     <main>
-//       <VideoUpload />
-//     </main>
-//   );
-// }
-// export default Upload;
+import { type Metadata } from "next";
+import VideoUpload from "~/components/VideoUpload";
+export const metadata: Metadata = {
+  title: "Upload",
+  description: "Upload Page",
+};
 
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -127,7 +119,7 @@ export default function Upload() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a verified email to display" />
+                      <SelectValue placeholder="Select a video type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
