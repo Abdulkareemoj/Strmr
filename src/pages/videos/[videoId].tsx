@@ -14,19 +14,3 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: { query: context.query },
   };
 };
-
-// import { useState } from 'react'
-// import { auth } from "../auth" // Replace with the actual path to your auth.ts file
-
-// export default function HomePage() {
-//   const [videoId, setVideoId] = useState('')
-
-//   return (
-//     <div>
-//       <input type="text" value={videoId} onChange={e => setVideoId(e.target.value)} />
-//       <video controls>
-//         <source src={`/api/videos/stream?id=${videoId}`} type="video/mp4" />
-//       </video>
-//     </div>
-//   )
-// }
