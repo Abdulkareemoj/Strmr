@@ -1,5 +1,4 @@
 import { type Metadata } from "next";
-import VideoUpload from "~/components/VideoUpload";
 export const metadata: Metadata = {
   title: "Upload",
   description: "Upload Page",
@@ -15,7 +14,7 @@ import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
-  // FormDescription,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -101,7 +100,7 @@ export default function Upload() {
   }
 
   return (
-    <main>
+    <main className="mx-auto flex  justify-center">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
@@ -112,7 +111,8 @@ export default function Upload() {
             name="videotype"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Video type</FormLabel>
+                <FormLabel className="text-xl">Video Upload</FormLabel>
+                <FormDescription>Please specify the video type</FormDescription>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -127,10 +127,7 @@ export default function Upload() {
                     <SelectItem value="short">Short</SelectItem>
                   </SelectContent>
                 </Select>
-                {/* <FormDescription>
-                You can manage email addresses in your{" "}
-                <Link href="/examples/forms">email settings</Link>  .
-              </FormDescription> */}
+
                 <FormMessage />
               </FormItem>
             )}
