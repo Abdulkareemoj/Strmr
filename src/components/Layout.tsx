@@ -1,7 +1,7 @@
 import { type Metadata } from "next";
 import { siteConfig } from "~/lib/config";
 import { Header } from "~/components/Header";
-import { Footer } from "~/components/Footer";
+// import { Footer } from "~/components/Footer";
 import { cn } from "~/lib/utils";
 import { ThemeProvider } from "~/components/Provider";
 import Head from "next/head";
@@ -73,7 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <main className="mx-auto max-w-3xl px-6 py-12 sm:px-6 sm:py-10 lg:py-10">
             {children}
           </main>
-          <Footer />
+          {/* <Footer /> */}
         </ThemeProvider>
         {/* <ThemeSwitcher /> */}
       </body>
