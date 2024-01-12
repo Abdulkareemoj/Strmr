@@ -1,10 +1,4 @@
-import { type Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Upload",
-  description: "Upload Page",
-};
-
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -30,12 +24,27 @@ import {
 import { toast } from "~/components/ui/use-toast";
 import { Progress } from "~/components/ui/progress";
 import { Input } from "~/components/ui/input";
-
+import { type Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Upload",
+  description: "Upload Page",
+};
 const FormSchema = z.object({
   videotype: z.string({
     required_error: "Please select one.",
   }),
 });
+
+const [session, loading] = useSession();
+
+// While the session is loading, show a loading message
+if (loading) return <div>Loading...</div>;
+
+// If no session exists, or the user is not an admin, show an error message or redirect
+if (!session || session.user.role !== "ADMIN") {
+  // Replace the following line with a redirect to your login page if you have one
+  return <div>You must be an admin to view this page</div>;
+}
 
 export default function Upload() {
   const form = useForm<z.infer<typeof FormSchema>>({

@@ -32,6 +32,14 @@ declare module "next-auth" {
   }
 }
 
+interface token {
+  id: number;
+  name: string;
+  email: string;
+  image: string;
+  role: string;
+}
+
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
@@ -39,14 +47,54 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    //     async session({ token, session }) {
+    //       if (token) {
+    //         session.user.id = token.id;
+    //         session.user.name = token.name;
+    //         session.user.email = token.email;
+    //         session.user.image = token.image;
+    //         session.user.role = token.role;
+    //       }
+    //       return session;
+    //     },
+    //    async jwt(token, user) {
+    //   const dbUser = await db.user.findFirst({
+    //     where: {
+    //       email: token.email,
+    //     },
+    //   });
+    //   if (!dbUser) {
+    //     if (user) {
+    //       token.id = user.id;
+    //     }
+    //     return token;
+    //   }
+    //   return {
+    //     id: dbUser.id,
+    //     name: dbUser.name,
+    //     email: dbUser.email,
+    //     picture: dbUser.image,
+    //     role: dbUser.role,
+    //   };
+    // },
+    async jwt(token, user) {
+      if (user) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { role: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+        }
+      }
+      return token;
+    },
+    async session(session, token) {
+      session.user.role = token.role;
+      return session;
+    },
   },
+
   adapter: PrismaAdapter(db),
   providers: [
     DiscordProvider({
@@ -68,8 +116,8 @@ export const authOptions: NextAuthOptions = {
      */
   ],
   pages: {
-    signIn: "/auth/signin", // a custom sign-in page
-    signOut: "/auth/signout", // a custom sign-out page
+    signIn: "/login", // a custom sign-in page
+    // signOut: "/auth/signout", // a custom sign-out page
     error: "/auth/error", // Error code passed in query string as ?error=
     // verifyRequest: '/auth/verify-request', // (used for check email message)
     // newUser: null // If set, new users will be directed here on first sign in

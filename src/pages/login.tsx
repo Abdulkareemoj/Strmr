@@ -14,7 +14,10 @@ type LoadingStates = {
   isLoadingGithub?: boolean;
 };
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+export default function UserAuthForm({
+  className,
+  ...props
+}: UserAuthFormProps) {
   const [loadingStates, setLoading] = useState<LoadingStates>({
     isLoadingGoogle: false,
     isLoadingGithub: false,
@@ -72,87 +75,89 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   }
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <form onSubmit={onSubmit}>
-        <div className="grid gap-2">
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="email">
-              Email
-            </Label>
-            <Input
-              id="email"
-              placeholder="name~example.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-            />
-            <Label className="sr-only" htmlFor="email">
-              Password
-            </Label>
-            <Input
-              id="password"
-              placeholder="password"
-              type="password"
-              autoCapitalize="none"
-              autoComplete="password"
-              autoCorrect="off"
-            />
+    <main className=" ">
+      <div className={cn("grid gap-6", className)} {...props}>
+        <form onSubmit={onSubmit}>
+          <div className="grid gap-2">
+            <div className="grid gap-1">
+              <Label className="sr-only" htmlFor="email">
+                Email
+              </Label>
+              <Input
+                id="email"
+                placeholder="name~example.com"
+                type="email"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect="off"
+              />
+              <Label className="sr-only" htmlFor="email">
+                Password
+              </Label>
+              <Input
+                id="password"
+                placeholder="password"
+                type="password"
+                autoCapitalize="none"
+                autoComplete="password"
+                autoCorrect="off"
+              />
+            </div>
+
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setLoadingState({ isLoadingEmail: true })}
+              disabled={isAnyLoading()}
+            >
+              {loadingStates.isLoadingEmail ? (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
           </div>
+        </form>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background text-muted-foreground px-2">
+              Or continue with
+            </span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => setLoadingState({ isLoadingGithub: true })}
+            disabled={isAnyLoading()}
+          >
+            {loadingStates.isLoadingGithub ? (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Icons.gitHub className="mr-2 h-4 w-4" />
+            )}{" "}
+            Github
+          </Button>
 
           <Button
             variant="outline"
             type="button"
-            onClick={() => setLoadingState({ isLoadingEmail: true })}
+            onClick={() => setLoadingState({ isLoadingGoogle: true })}
             disabled={isAnyLoading()}
           >
-            {loadingStates.isLoadingEmail ? (
+            {loadingStates.isLoadingGoogle ? (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              "Sign In"
-            )}
+              <Icons.google className="mr-2 h-4 w-4" />
+            )}{" "}
+            Google
           </Button>
         </div>
-      </form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background text-muted-foreground px-2">
-            Or continue with
-          </span>
-        </div>
       </div>
-      <div className="grid grid-cols-2 gap-6">
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => setLoadingState({ isLoadingGithub: true })}
-          disabled={isAnyLoading()}
-        >
-          {loadingStates.isLoadingGithub ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.gitHub className="mr-2 h-4 w-4" />
-          )}{" "}
-          Github
-        </Button>
-
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => setLoadingState({ isLoadingGoogle: true })}
-          disabled={isAnyLoading()}
-        >
-          {loadingStates.isLoadingGoogle ? (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Icons.google className="mr-2 h-4 w-4" />
-          )}{" "}
-          Google
-        </Button>
-      </div>
-    </div>
+    </main>
   );
 }
