@@ -1,5 +1,5 @@
-import VideoPlayer from "@/components/VideoPlayer";
-import { GetServerSideProps } from "next";
+import VideoPlayer from "~/components/VideoPlayer";
+import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
 export default function VideoPage() {
