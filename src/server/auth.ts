@@ -6,8 +6,10 @@ import {
   getServerSession,
   type NextAuthOptions,
 } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-import GoogleProvider from "next-auth/providers/google";
+import DiscordProvider, {
+  type DiscordProfile,
+} from "next-auth/providers/discord";
+import GoogleProvider, { type GoogleProfile } from "next-auth/providers/google";
 import { env } from "~/env";
 import { db } from "~/server/db";
 
@@ -32,14 +34,6 @@ declare module "next-auth" {
   }
 }
 
-interface token {
-  id: number;
-  name: string;
-  email: string;
-  image: string;
-  role: string;
-}
-
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
@@ -47,50 +41,8 @@ interface token {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    //     async session({ token, session }) {
-    //       if (token) {
-    //         session.user.id = token.id;
-    //         session.user.name = token.name;
-    //         session.user.email = token.email;
-    //         session.user.image = token.image;
-    //         session.user.role = token.role;
-    //       }
-    //       return session;
-    //     },
-    //    async jwt(token, user) {
-    //   const dbUser = await db.user.findFirst({
-    //     where: {
-    //       email: token.email,
-    //     },
-    //   });
-    //   if (!dbUser) {
-    //     if (user) {
-    //       token.id = user.id;
-    //     }
-    //     return token;
-    //   }
-    //   return {
-    //     id: dbUser.id,
-    //     name: dbUser.name,
-    //     email: dbUser.email,
-    //     picture: dbUser.image,
-    //     role: dbUser.role,
-    //   };
-    // },
-    async jwt(token, user) {
-      if (user) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email },
-          select: { role: true },
-        });
-        if (dbUser) {
-          token.role = dbUser.role;
-        }
-      }
-      return token;
-    },
-    async session(session, token) {
-      session.user.role = token.role;
+    session({ session, user }) {
+      session.user.role = user.role;
       return session;
     },
   },
@@ -100,10 +52,28 @@ export const authOptions: NextAuthOptions = {
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+      profile(profile: DiscordProfile) {
+        return {
+          role: "user" as UserRole,
+          id: profile.id,
+          name: profile.username,
+          email: profile.email,
+          image: profile.avatar,
+        };
+      },
     }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+      profile(profile: GoogleProfile) {
+        return {
+          role: "user" as UserRole,
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
+      },
     }),
     /**
      * ...add more providers here.
