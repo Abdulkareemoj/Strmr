@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { cn } from "~/lib/utils";
 import { Icons } from "~/components/ui/icons";
 import { Button } from "~/components/ui/button";
@@ -11,7 +12,7 @@ type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 type LoadingStates = {
   isLoadingEmail?: boolean;
   isLoadingGoogle?: boolean;
-  isLoadingGithub?: boolean;
+  isLoadingDiscord?: boolean;
 };
 
 export default function UserAuthForm({
@@ -20,7 +21,7 @@ export default function UserAuthForm({
 }: UserAuthFormProps) {
   const [loadingStates, setLoading] = useState<LoadingStates>({
     isLoadingGoogle: false,
-    isLoadingGithub: false,
+    isLoadingDiscord: false,
     isLoadingEmail: false,
   });
 
@@ -33,7 +34,7 @@ export default function UserAuthForm({
     setTimeout(() => {
       setLoading({
         isLoadingGoogle: false,
-        isLoadingGithub: false,
+        isLoadingDiscord: false,
         isLoadingEmail: false,
       });
     }, 5000);
@@ -41,7 +42,7 @@ export default function UserAuthForm({
 
   function isAnyLoading(): boolean {
     return (
-      loadingStates.isLoadingGithub ||
+      loadingStates.isLoadingDiscord ||
       loadingStates.isLoadingGoogle ||
       loadingStates.isLoadingEmail ||
       false
@@ -57,7 +58,7 @@ export default function UserAuthForm({
     const email = target.email.value;
     const password = target.password.value;
 
-    const response = await fetch("/api/login", {
+    const response = await fetch("/api/auth/callback/credentials", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -132,15 +133,15 @@ export default function UserAuthForm({
           <Button
             variant="outline"
             type="button"
-            onClick={() => setLoadingState({ isLoadingGithub: true })}
+            onClick={() => setLoadingState({ isLoadingDiscord: true })}
             disabled={isAnyLoading()}
           >
-            {loadingStates.isLoadingGithub ? (
+            {loadingStates.isLoadingDiscord ? (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Icons.gitHub className="mr-2 h-4 w-4" />
+              <Icons.discord className="mr-2 h-4 w-4" />
             )}{" "}
-            Github
+            Discord
           </Button>
 
           <Button
