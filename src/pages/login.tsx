@@ -133,7 +133,10 @@ export default function UserAuthForm({
           <Button
             variant="outline"
             type="button"
-            onClick={() => setLoadingState({ isLoadingDiscord: true })}
+            onClick={() => {
+              setLoadingState({ isLoadingDiscord: true });
+              window.location.href = "/api/auth/signin/discord";
+            }}
             disabled={isAnyLoading()}
           >
             {loadingStates.isLoadingDiscord ? (
@@ -147,7 +150,10 @@ export default function UserAuthForm({
           <Button
             variant="outline"
             type="button"
-            onClick={() => setLoadingState({ isLoadingGoogle: true })}
+            onClick={() => {
+              setLoadingState({ isLoadingGoogle: true });
+              window.location.href = "/api/auth/signin/google";
+            }}
             disabled={isAnyLoading()}
           >
             {loadingStates.isLoadingGoogle ? (
