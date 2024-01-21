@@ -35,17 +35,6 @@ const FormSchema = z.object({
   }),
 });
 
-const [session, loading] = useSession();
-
-// While the session is loading, show a loading message
-if (loading) return <div>Loading...</div>;
-
-// If no session exists, or the user is not an admin, show an error message or redirect
-if (!session || session.user.role !== "ADMIN") {
-  // Replace the following line with a redirect to your login page if you have one
-  return <div>You must be an admin to view this page</div>;
-}
-
 export default function Upload() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
