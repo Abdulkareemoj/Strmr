@@ -76,7 +76,7 @@ export default function UserAuthForm({
   }
 
   return (
-    <main className=" ">
+    <main className="px-24 pt-10 ">
       <div className={cn("grid gap-6", className)} {...props}>
         <form onSubmit={onSubmit}>
           <div className="grid gap-2">
@@ -86,7 +86,7 @@ export default function UserAuthForm({
               </Label>
               <Input
                 id="email"
-                placeholder="name~example.com"
+                placeholder="name@example.com"
                 type="email"
                 autoCapitalize="none"
                 autoComplete="email"
