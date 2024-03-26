@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <>
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -77,6 +77,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </ThemeProvider>
         {/* <ThemeSwitcher /> */}
       </body>
-    </html>
+    </>
   );
 }
