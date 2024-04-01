@@ -3,7 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { ThemeProvider } from "next-themes";
 import "~/styles/globals.css";
-import Layout from "../components/Layout";
+import Layout from "~/components/Layout";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -14,7 +14,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <ThemeProvider>
         <Layout>
           <Component {...pageProps} />
-        </Layout>{" "}
+        </Layout>
       </ThemeProvider>
     </SessionProvider>
   );
