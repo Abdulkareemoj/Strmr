@@ -1,25 +1,33 @@
 import "@vidstack/react/player/styles/base.css";
-
+import "@vidstack/react/player/styles/plyr/theme.css";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
-import { PlayIcon } from "@vidstack/react/icons";
-function VideoPlayer({ id }: { id: string }) {
+import {
+  PlyrLayout,
+  plyrLayoutIcons,
+} from "@vidstack/react/player/layouts/plyr";
+
+export default function VideoPlayer() {
   return (
     <>
-      <MediaPlayer
-        title="Sprite Fight"
-        src="https://stream.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/low.mp4"
-      >
-        <MediaProvider />
-      </MediaPlayer>
-      <video
+      <main>
+        <MediaPlayer title="help" src="/An Overview of Agile Development.mp4  ">
+          <MediaProvider />
+          <PlyrLayout
+            thumbnails="https://image.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/storyboard.vtt"
+            icons={plyrLayoutIcons}
+          />
+        </MediaPlayer>
+      </main>
+    </>
+  );
+}
+
+{
+  /* <video
         src={`/api/videos/?videoID=${id}`}
         width="auto"
         height="auto"
         controls
         id="video-player"
-      />
-    </>
-  );
+      /> */
 }
-
-export default VideoPlayer;
