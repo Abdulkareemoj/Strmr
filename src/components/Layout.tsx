@@ -70,9 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
         >
           <Header />
-          <main className="mx-auto  px-6 py-12 sm:px-6 sm:py-10 lg:py-10">
-            {children}
-          </main>
+          <main className="mx-auto px-6 ">{children}</main>
           {/* <Footer /> */}
         </ThemeProvider>
         {/* <ThemeSwitcher /> */}
