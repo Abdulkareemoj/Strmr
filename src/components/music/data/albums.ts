@@ -1,71 +1,61 @@
 export interface Album {
-  name: string
-  artist: string
-  cover: string
+  name: string;
+  artist: string;
+  cover: string;
 }
 
 export const listenNowAlbums: Album[] = [
   {
     name: "React Rendezvous",
     artist: "Ethan Byte",
-    cover:
-      "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=300&dpr=2&q=80",
+    cover: "/0e7b86a793600b0b3df91c09cf8a1e7b.png",
   },
   {
     name: "Async Awakenings",
     artist: "Nina Netcode",
-    cover:
-      "https://images.unsplash.com/photo-1468817814611-b7edf94b5d60?w=300&dpr=2&q=80",
+    cover: "/2d7fca9f7385e80a2d3c254fede2b778.png",
   },
   {
     name: "The Art of Reusability",
     artist: "Lena Logic",
-    cover:
-      "https://images.unsplash.com/photo-1528143358888-6d3c7f67bd5d?w=300&dpr=2&q=80",
+    cover: "/4bedb795ba054f72cd66fcd8b3ac7cd4.png",
   },
   {
     name: "Stateful Symphony",
     artist: "Beth Binary",
-    cover:
-      "https://images.unsplash.com/photo-1490300472339-79e4adc6be4a?w=300&dpr=2&q=80",
+    cover: "/7f0749c3c0755ac92b5a53bbf255a670.png",
   },
-]
+];
 
 export const madeForYouAlbums: Album[] = [
   {
     name: "Thinking Components",
     artist: "Lena Logic",
-    cover:
-      "https://images.unsplash.com/photo-1615247001958-f4bc92fa6a4a?w=300&dpr=2&q=80",
+    cover: "/48bc889f3f2a973b24ce9eed458b795e.png",
   },
   {
     name: "Functional Fury",
     artist: "Beth Binary",
-    cover:
-      "https://images.unsplash.com/photo-1513745405825-efaf9a49315f?w=300&dpr=2&q=80",
+    cover: "/49ac59d5bd1ec02cead1537eaab9e99d.png",
   },
   {
     name: "React Rendezvous",
     artist: "Ethan Byte",
-    cover:
-      "https://images.unsplash.com/photo-1614113489855-66422ad300a4?w=300&dpr=2&q=80",
+    cover: "/50f66ea4196d92b7db6c2d5e7648d878.png",
   },
   {
     name: "Stateful Symphony",
     artist: "Beth Binary",
-    cover:
-      "https://images.unsplash.com/photo-1446185250204-f94591f7d702?w=300&dpr=2&q=80",
+    cover: "/616bacb5480d507c2c985da97527d9c9.png",
   },
   {
     name: "Async Awakenings",
     artist: "Nina Netcode",
-    cover:
-      "https://images.unsplash.com/photo-1468817814611-b7edf94b5d60?w=300&dpr=2&q=80",
+    cover: "/48868b797347e61d7efb28372f861f91.png",
   },
   {
     name: "The Art of Reusability",
     artist: "Lena Logic",
-    cover:
-      "https://images.unsplash.com/photo-1490300472339-79e4adc6be4a?w=300&dpr=2&q=80",
+    cover: "/57475f1fc5a3a139a9eec8d29ca625c8.png",
   },
-]
+];
