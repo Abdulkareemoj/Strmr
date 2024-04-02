@@ -5,6 +5,14 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useState } from "react";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 //chnaged to interface from type
@@ -76,95 +84,80 @@ export default function UserAuthForm({
   }
 
   return (
-    <main className="px-24 pt-10 ">
-      <div className={cn("grid gap-6", className)} {...props}>
-        <form onSubmit={onSubmit}>
+    <Card className="mx-auto mt-20 max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">Login</CardTitle>
+        <CardDescription>
+          Enter your email below to login to your account
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">
           <div className="grid gap-2">
-            <div className="grid gap-1">
-              <Label className="sr-only" htmlFor="email">
-                Email
-              </Label>
-              <Input
-                id="email"
-                placeholder="name@example.com"
-                type="email"
-                autoCapitalize="none"
-                autoComplete="email"
-                autoCorrect="off"
-              />
-              <Label className="sr-only" htmlFor="email">
-                Password
-              </Label>
-              <Input
-                id="password"
-                placeholder="password"
-                type="password"
-                autoCapitalize="none"
-                autoComplete="password"
-                autoCorrect="off"
-              />
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="password">Password</Label>
+              <Link href="#" className="ml-auto inline-block text-sm underline">
+                Forgot your password?
+              </Link>
             </div>
+            <Input id="password" type="password" required />
+          </div>
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+          <div className="grid grid-cols-2 gap-6">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setLoadingState({ isLoadingDiscord: true });
+                window.location.href = "/api/auth/signin/discord";
+              }}
+              disabled={isAnyLoading()}
+            >
+              {loadingStates.isLoadingDiscord ? (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Icons.discord className="mr-2 h-4 w-4" />
+              )}{" "}
+              Discord
+            </Button>
 
             <Button
               variant="outline"
               type="button"
-              onClick={() => setLoadingState({ isLoadingEmail: true })}
+              onClick={() => {
+                setLoadingState({ isLoadingGoogle: true });
+                window.location.href = "/api/auth/signin/google";
+              }}
               disabled={isAnyLoading()}
             >
-              {loadingStates.isLoadingEmail ? (
+              {loadingStates.isLoadingGoogle ? (
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                "Sign In"
-              )}
+                <Icons.google className="mr-2 h-4 w-4" />
+              )}{" "}
+              Google
             </Button>
           </div>
-        </form>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2">
-              Or continue with
-            </span>
-          </div>
+          ;
         </div>
-        <div className="grid grid-cols-2 gap-6">
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => {
-              setLoadingState({ isLoadingDiscord: true });
-              window.location.href = "/api/auth/signin/discord";
-            }}
-            disabled={isAnyLoading()}
-          >
-            {loadingStates.isLoadingDiscord ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Icons.discord className="mr-2 h-4 w-4" />
-            )}{" "}
-            Discord
-          </Button>
-
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => {
-              setLoadingState({ isLoadingGoogle: true });
-              window.location.href = "/api/auth/signin/google";
-            }}
-            disabled={isAnyLoading()}
-          >
-            {loadingStates.isLoadingGoogle ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Icons.google className="mr-2 h-4 w-4" />
-            )}{" "}
-            Google
-          </Button>
+        <div className="mt-4 text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" className="underline">
+            Sign up
+          </Link>
         </div>
-      </div>
-    </main>
+      </CardContent>
+    </Card>
   );
 }
