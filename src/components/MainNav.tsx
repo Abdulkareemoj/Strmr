@@ -16,7 +16,8 @@ export function MainNav() {
       <nav className="flex items-center space-x-6 text-sm font-medium">
         <Link href="/trending">Trending</Link>
         <Link href="/shorts">Shorts</Link>
-        <Link href="/upload">Upload</Link>
+        {/* <Link href="/upload">Upload</Link> */}
+        <Link href="/music">Music</Link>
       </nav>
     </div>
   );
