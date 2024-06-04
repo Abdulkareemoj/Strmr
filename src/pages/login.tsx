@@ -13,6 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { createClient } from "@supabase/supabase-js";
+const supabaseUrl = NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 //chnaged to interface from type
@@ -66,7 +71,7 @@ export default function UserAuthForm({
     const email = target.email.value;
     const password = target.password.value;
 
-    const response = await fetch("/api/auth/callback/credentials", {
+    const response = await fetch("/api/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

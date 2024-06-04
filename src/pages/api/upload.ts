@@ -1,20 +1,3 @@
-// i have 2 categories of videos to upload, shorts and regular videos
-// i want to Upload the regular video or short with details to cloudinary from upload form
-//upload videos to separate folders depending on whether it is a short or a regular videos
-//then get the{
-// id
-// description
-// videoId
-// public
-// url
-// thumbnailUrl
-// duration
-//}
-// send them to db based on whether it is a short or regular video
-// my database already has separate models for short and video
-// they collect the same details
-// its just for the backend to upload it to the correct place
-// is it fine to do it from one backend api or create 2 separate apis on and upload to handle the upload function to cloudinary because the two categories will have different folders to upload to
 import { type NextApiRequest, type NextApiResponse } from "next";
 import Busboy from "busboy";
 import uploadVideo from "./uploadVideo"; // Your video upload function
