@@ -62,19 +62,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <body className={cn("bg-background min-h-screen font-sans antialiased")}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <div className={cn("bg-background min-h-screen font-sans antialiased")}>
           <Header />
-          <main className="mx-auto px-6 ">{children}</main>
+          <main className="mx-auto px-6">{children}</main>
           {/* <Footer /> */}
-        </ThemeProvider>
+        </div>
         {/* <ThemeSwitcher /> */}
-      </body>
+      </ThemeProvider>
     </>
   );
 }
