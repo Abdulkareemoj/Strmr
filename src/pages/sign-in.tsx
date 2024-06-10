@@ -13,14 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { createClient } from "@supabase/supabase-js";
-// const supabaseUrl = NEXT_PUBLIC_SUPABASE_URL;
-// const supabaseKey = NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-// const supabase = createClient(supabaseUrl, supabaseKey);
+import { createClient } from "~/utils/supabase/component";
+import { useRouter } from "next/router";
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
-//chnaged to interface from type
 
 type LoadingStates = {
   isLoadingEmail?: boolean;
@@ -37,6 +33,8 @@ export default function UserAuthForm({
     isLoadingDiscord: false,
     isLoadingEmail: false,
   });
+  const router = useRouter();
+  const supabase = createClient();
 
   function setLoadingState(obj: typeof loadingStates) {
     setLoading((prev) => ({
@@ -71,21 +69,31 @@ export default function UserAuthForm({
     const email = target.email.value;
     const password = target.password.value;
 
-    const response = await fetch("/api/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
     });
 
-    if (response.ok) {
-      // The login was successful
+    if (error) {
       console.log("Login successful");
     } else {
-      // The login failed
       console.log("Login failed");
     }
+  }
+
+  // Social login functions
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+    if (error) console.error("Google login failed", error.message);
+  }
+
+  async function signInWithDiscord() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "discord",
+    });
+    if (error) console.error("Discord login failed", error.message);
   }
 
   return (
@@ -116,7 +124,7 @@ export default function UserAuthForm({
             </div>
             <Input id="password" type="password" required />
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" onClick={() => onSubmit} className="w-full">
             Login
           </Button>
           <div className="grid grid-cols-2 gap-6">
@@ -125,7 +133,7 @@ export default function UserAuthForm({
               type="button"
               onClick={() => {
                 setLoadingState({ isLoadingDiscord: true });
-                window.location.href = "/api/auth/signin/discord";
+                signInWithDiscord;
               }}
               disabled={isAnyLoading()}
             >
@@ -142,7 +150,7 @@ export default function UserAuthForm({
               type="button"
               onClick={() => {
                 setLoadingState({ isLoadingGoogle: true });
-                window.location.href = "/api/auth/signin/google";
+                signInWithGoogle;
               }}
               disabled={isAnyLoading()}
             >
