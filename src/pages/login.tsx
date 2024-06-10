@@ -14,10 +14,10 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { createClient } from "@supabase/supabase-js";
-const supabaseUrl = NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// const supabaseUrl = NEXT_PUBLIC_SUPABASE_URL;
+// const supabaseKey = NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// const supabase = createClient(supabaseUrl, supabaseKey);
 
 type UserAuthFormProps = React.HTMLAttributes<HTMLDivElement>;
 //chnaged to interface from type

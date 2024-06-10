@@ -2,7 +2,7 @@ import { CommandMenu } from "~/components/CommandMenu";
 import { MainNav } from "~/components/MainNav";
 import { MobileNav } from "~/components/MobileNav";
 import { ModeToggle } from "~/components/ModeToggle";
-import LoginBtn from "~/components/LoginBtn";
+// import LoginBtn from "~/components/LoginBtn";
 
 export function Header() {
   return (
@@ -15,7 +15,7 @@ export function Header() {
             <CommandMenu />
           </div>
           <nav className="flex items-center space-x-6">
-            <LoginBtn />
+            {/* <LoginBtn /> */}
             <ModeToggle />
           </nav>
         </div>
