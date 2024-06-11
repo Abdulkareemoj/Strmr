@@ -97,7 +97,7 @@ export default function UserAuthForm({
   }
 
   return (
-    <Card className="mx-auto mt-20 max-w-sm">
+    <Card className="mx-auto mt-20 max-w-sm ">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>

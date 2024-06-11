@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-center ">
+      <main className="flex min-h-screen flex-col items-center justify-center">
         <section className="body-font text-gray-600">
           <div className="container mx-auto flex flex-wrap items-center px-5 py-24">
             <div className="mb-10 border-b border-gray-200 pb-10 md:mb-0 md:w-1/2 md:border-b-0 md:border-r md:py-8 md:pr-12">
@@ -26,9 +26,9 @@ export default function Home() {
                 <svg
                   fill="none"
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   className="ml-2 h-4 w-4"
                   viewBox="0 0 24 24"
                 >
