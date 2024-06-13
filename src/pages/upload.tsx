@@ -1,4 +1,3 @@
-import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -98,7 +97,7 @@ export default function Upload() {
   }
 
   return (
-    <main className="mx-auto flex  justify-center">
+    <main className="mx-auto flex justify-center">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}

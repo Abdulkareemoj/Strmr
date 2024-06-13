@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-import { cn } from "~/lib/utils";
 import { Icons } from "~/components/ui/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -53,9 +51,9 @@ export default function UserAuthForm({
 
   function isAnyLoading(): boolean {
     return (
-      loadingStates.isLoadingDiscord ||
-      loadingStates.isLoadingGoogle ||
-      loadingStates.isLoadingEmail ||
+      loadingStates.isLoadingDiscord ??
+      loadingStates.isLoadingGoogle ??
+      loadingStates.isLoadingEmail ??
       false
     );
   }
@@ -76,6 +74,7 @@ export default function UserAuthForm({
 
     if (error) {
       console.log("Login successful");
+      void router.push("/trending");
     } else {
       console.log("Login failed");
     }
@@ -86,6 +85,7 @@ export default function UserAuthForm({
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
     });
+    void router.push("/trending");
     if (error) console.error("Google login failed", error.message);
   }
 
@@ -93,11 +93,12 @@ export default function UserAuthForm({
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "discord",
     });
+    void router.push("/trending");
     if (error) console.error("Discord login failed", error.message);
   }
 
   return (
-    <Card className="mx-auto mt-20 max-w-sm ">
+    <Card className="mx-auto mt-20 max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
