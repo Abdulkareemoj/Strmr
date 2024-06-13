@@ -11,37 +11,23 @@ import { createClient } from "~/utils/supabase/component";
 import { AvatarIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
+import { type Session } from "@supabase/supabase-js";
 
 export default function LoginBtn() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<Session | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        setSession(session);
-      } catch (error) {
-        console.error("Failed to fetch session:", error);
-        // Handle the error appropriately
-      }
-    };
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-    void fetchSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        return setSession(session);
-      },
-    );
-
-    return () => {
-      authListener?.unsubscribe();
-    };
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
   }, []);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     void router.push("/"); // Navigate to the home page after sign out
