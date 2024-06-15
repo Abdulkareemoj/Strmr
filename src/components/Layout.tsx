@@ -1,11 +1,10 @@
 import { type Metadata } from "next";
 import { siteConfig } from "~/lib/config";
-import { Header } from "~/components/Header";
+import Header from "~/components/Header";
 // import { Footer } from "~/components/Footer";
 import { cn } from "~/lib/utils";
 import { ThemeProvider } from "~/components/Provider";
 import Head from "next/head";
-// import { ThemeSwitcher } from "~/components/theme-switcher";
 
 export const metadata: Metadata = {
   title: {
@@ -70,10 +69,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       >
         <div className={cn("bg-background min-h-screen font-sans antialiased")}>
           <Header />
+
           <main className="mx-auto px-6">{children}</main>
           {/* <Footer /> */}
         </div>
-        {/* <ThemeSwitcher /> */}
       </ThemeProvider>
     </>
   );

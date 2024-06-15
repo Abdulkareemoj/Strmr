@@ -1,24 +1,122 @@
-import { CommandMenu } from "~/components/CommandMenu";
-import { MainNav } from "~/components/MainNav";
-import { MobileNav } from "~/components/MobileNav";
-import { ModeToggle } from "~/components/ModeToggle";
+import { CircleUser, Menu, Package2, Search } from "lucide-react";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { ModeToggle } from "./ModeToggle";
 import LoginBtn from "./LoginBtn";
+import { siteConfig } from "~/lib/config";
 
-export function Header() {
+export default function Header() {
   return (
-    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
-      <div className="container flex h-14 items-center">
-        <MainNav />
-        <MobileNav />
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <CommandMenu />
-          </div>
-          <nav className="flex items-center space-x-6">
-            <LoginBtn />
-            <ModeToggle />
+    <header className="bg-background sticky top-0 flex h-16 items-center gap-4 border-b px-4 md:px-6">
+      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        <Link
+          href="#"
+          className="flex items-center gap-2 text-lg font-semibold md:text-base"
+        >
+          <Package2 className="h-6 w-6" />
+          <span className="hidden font-bold sm:inline-block">
+            {siteConfig.name}
+          </span>
+        </Link>
+        <Link
+          href="#"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Home
+        </Link>
+        <Link
+          href="/trending"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Trending
+        </Link>
+        <Link
+          href="/shorts"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Shorts
+        </Link>
+        <Link
+          href="/music"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Music
+        </Link>
+        {/* <Link
+          href="#"
+          className="text-foreground hover:text-foreground transition-colors"
+        >
+          Settings
+        </Link> */}
+      </nav>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <nav className="grid gap-6 text-lg font-medium">
+            <Link
+              href="#"
+              className="flex items-center gap-2 text-lg font-semibold"
+            >
+              <Package2 className="h-6 w-6" />
+              <span className="sr-only">Acme Inc</span>
+            </Link>
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Strmr
+            </Link>
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Trending
+            </Link>
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Shorts
+            </Link>
+            <Link
+              href="#"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Music
+            </Link>
+            <Link href="#" className="hover:text-foreground">
+              Settings
+            </Link>
           </nav>
-        </div>
+        </SheetContent>
+      </Sheet>
+      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <form className="ml-auto flex-1 sm:flex-initial">
+          <div className="relative">
+            <Search className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
+            <Input
+              type="search"
+              placeholder="Search products..."
+              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+            />
+          </div>
+        </form>
+        <LoginBtn /> <ModeToggle />
       </div>
     </header>
   );
