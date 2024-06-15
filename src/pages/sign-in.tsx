@@ -98,80 +98,86 @@ export default function UserAuthForm({
   }
 
   return (
-    <Card className="mx-auto mt-20 max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
-              <Link href="#" className="ml-auto inline-block text-sm underline">
-                Forgot your password?
-              </Link>
+    <main className="flex h-screen items-center justify-center overflow-hidden">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Sign In</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+              />
             </div>
-            <Input id="password" type="password" required />
-          </div>
-          <Button type="submit" onClick={() => onSubmit} className="w-full">
-            Login
-          </Button>
-          <div className="grid grid-cols-2 gap-6">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => {
-                setLoadingState({ isLoadingDiscord: true });
-                signInWithDiscord;
-              }}
-              disabled={isAnyLoading()}
-            >
-              {loadingStates.isLoadingDiscord ? (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Icons.discord className="mr-2 h-4 w-4" />
-              )}{" "}
-              Discord
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="#"
+                  className="ml-auto inline-block text-sm underline"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+              <Input id="password" type="password" required />
+            </div>
+            <Button type="submit" onClick={() => onSubmit} className="w-full">
+              Login
             </Button>
 
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => {
-                setLoadingState({ isLoadingGoogle: true });
-                signInWithGoogle;
-              }}
-              disabled={isAnyLoading()}
-            >
-              {loadingStates.isLoadingGoogle ? (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Icons.google className="mr-2 h-4 w-4" />
-              )}{" "}
-              Google
-            </Button>
+            <div className="flex justify-center">Or</div>
+            <div className="grid grid-cols-2 gap-6">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  setLoadingState({ isLoadingDiscord: true });
+                  signInWithDiscord;
+                }}
+                disabled={isAnyLoading()}
+              >
+                {loadingStates.isLoadingDiscord ? (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Icons.discord className="mr-2 h-4 w-4" />
+                )}{" "}
+                Discord
+              </Button>
+
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  setLoadingState({ isLoadingGoogle: true });
+                  signInWithGoogle;
+                }}
+                disabled={isAnyLoading()}
+              >
+                {loadingStates.isLoadingGoogle ? (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Icons.google className="mr-2 h-4 w-4" />
+                )}{" "}
+                Google
+              </Button>
+            </div>
           </div>
-          ;
-        </div>
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="underline">
-            Sign up
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="mt-4 text-center text-sm">
+            Don&apos;t have an account?{" "}
+            <Link href="/sign-up" className="underline">
+              Sign up
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </main>
   );
 }
