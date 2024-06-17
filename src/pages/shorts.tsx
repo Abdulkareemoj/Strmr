@@ -6,43 +6,6 @@ import { Icons } from "../components/ui/icons";
 export default function Shorts() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between bg-gray-900 px-6 py-4 text-white md:px-8">
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
-          <Icons.YoutubeIcon className="h-6 w-6" />
-          <span className="text-lg font-semibold">Shorts Recommendations</span>
-        </Link>
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Home
-          </Link>
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Trending
-          </Link>
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Subscriptions
-          </Link>
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Library
-          </Link>
-        </nav>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Icons.MenuIcon className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Icons.SearchIcon className="h-6 w-6" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Image
-              src="/placeholder.svg"
-              width={32}
-              height={32}
-              alt="User Avatar"
-              className="rounded-full"
-            />
-          </Button>
-        </div>
-      </header>
       <main className="flex-1 px-6 py-8 md:px-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {[
@@ -143,25 +106,6 @@ export default function Shorts() {
           ))}
         </div>
       </main>
-      <footer className="flex items-center justify-between bg-gray-900 px-6 py-6 text-white md:px-8">
-        <div className="text-sm">
-          &copy; 2024 Shorts Recommendations. All rights reserved.
-        </div>
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link href="#" className="hover:underline" prefetch={false}>
-            About
-          </Link>
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Terms of Service
-          </Link>
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Privacy Policy
-          </Link>
-          <Link href="#" className="hover:underline" prefetch={false}>
-            Contact
-          </Link>
-        </nav>
-      </footer>
     </div>
   );
 }

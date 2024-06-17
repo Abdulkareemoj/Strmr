@@ -70,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className={cn("bg-background min-h-screen font-sans antialiased")}>
           <Header />
 
-          <main className="mx-auto px-6">{children}</main>
+          <main className="mx-auto">{children}</main>
           {/* <Footer /> */}
         </div>
       </ThemeProvider>
