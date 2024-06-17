@@ -10,7 +10,7 @@ import { siteConfig } from "~/lib/config";
 
 export default function Header() {
   return (
-    <header className="bg-background sticky top-0 flex h-16 items-center gap-4 border-b px-4 md:px-6">
+    <header className="bg-background sticky top-0 mx-10 flex h-16 items-center gap-4 border-b px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link
           href="#"
@@ -66,33 +66,35 @@ export default function Header() {
               className="flex items-center gap-2 text-lg font-semibold"
             >
               <Package2 className="h-6 w-6" />
-              <span className="sr-only">Acme Inc</span>
+              <span className="hidden font-bold sm:inline-block">
+                {siteConfig.name}
+              </span>
             </Link>
             <Link
-              href="#"
+              href="/"
               className="text-muted-foreground hover:text-foreground"
             >
               Strmr
             </Link>
             <Link
-              href="#"
+              href="/trending"
               className="text-muted-foreground hover:text-foreground"
             >
               Trending
             </Link>
             <Link
-              href="#"
+              href="/shorts"
               className="text-muted-foreground hover:text-foreground"
             >
               Shorts
             </Link>
             <Link
-              href="#"
+              href="/music"
               className="text-muted-foreground hover:text-foreground"
             >
               Music
             </Link>
-            <Link href="#" className="hover:text-foreground">
+            <Link href="settings" className="hover:text-foreground">
               Settings
             </Link>
           </nav>
