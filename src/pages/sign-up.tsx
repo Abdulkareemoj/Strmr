@@ -14,7 +14,7 @@ import { Label } from "~/components/ui/label";
 export default function SignUp() {
   return (
     <main className="flex h-screen items-center justify-center overflow-hidden">
-      <Card className="max-w-sm">
+      <Card>
         <CardHeader>
           <CardTitle className="text-xl">Sign Up</CardTitle>
           <CardDescription>

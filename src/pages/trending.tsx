@@ -1,9 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import { type JSX, type SVGProps } from "react";
 
 import { Button } from "~/components/ui/button";
 
-export default function Component() {
+export default function Trending() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* <header className="flex items-center justify-between bg-gray-900 px-6 py-4 text-white md:px-8">
@@ -43,6 +44,7 @@ export default function Component() {
           </Button>
         </div>
       </header> */}
+      <div className="p-4">Trending</div>
       <main className="flex-1 px-6 py-8 md:px-8">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {[
@@ -118,7 +120,7 @@ export default function Component() {
               prefetch={false}
             >
               <div className="relative">
-                <img
+                <Image
                   src="/placeholder.svg"
                   width={320}
                   height={180}
