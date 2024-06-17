@@ -1,8 +1,7 @@
 import { Slider } from "~/components/ui/slider";
 import { Button } from "~/components/ui/button";
 import Image from "next/image";
-import { JSX, SVGProps } from "react";
-
+import { Icons } from "~/components/ui/icons";
 export default function Component() {
   return (
     <div className="flex h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -38,78 +37,17 @@ export default function Component() {
           </div>
           <div className="mt-6 flex items-center justify-center gap-4">
             <Button variant="ghost" size="icon">
-              <RewindIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+              <Icons.RewindIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
             </Button>
             <Button variant="ghost" size="icon">
-              <PlayIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+              <Icons.PlayIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
             </Button>
             <Button variant="ghost" size="icon">
-              <FastForwardIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+              <Icons.FastForwardIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
             </Button>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function FastForwardIcon(
-  props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>,
-) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="13 19 22 12 13 5 13 19" />
-      <polygon points="2 19 11 12 2 5 2 19" />
-    </svg>
-  );
-}
-
-function PlayIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="6 3 20 12 6 21 6 3" />
-    </svg>
-  );
-}
-
-function RewindIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="11 19 2 12 11 5 11 19" />
-      <polygon points="22 19 13 12 22 5 22 19" />
-    </svg>
   );
 }
