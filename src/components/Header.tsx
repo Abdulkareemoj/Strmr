@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { ModeToggle } from "./ModeToggle";
 import LoginBtn from "./LoginBtn";
 import { siteConfig } from "~/lib/config";
+import { CommandMenu } from "./CommandMenu";
 
 export default function Header() {
   return (
@@ -111,6 +112,7 @@ export default function Header() {
             />
           </div>
         </form>
+        <CommandMenu />
         <LoginBtn /> <ModeToggle />
       </div>
     </header>
