@@ -16,7 +16,7 @@ export default function SignUp() {
     <main className="flex h-screen items-center justify-center overflow-hidden">
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Sign Up</CardTitle>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>
             Enter your information to create an account
           </CardDescription>

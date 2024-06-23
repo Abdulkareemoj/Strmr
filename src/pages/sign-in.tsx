@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { Icons } from "~/components/ui/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -46,14 +47,14 @@ export default function UserAuthForm({
         isLoadingDiscord: false,
         isLoadingEmail: false,
       });
-    }, 5000);
+    }, 3000);
   }
 
   function isAnyLoading(): boolean {
     return (
-      loadingStates.isLoadingDiscord ??
-      loadingStates.isLoadingGoogle ??
-      loadingStates.isLoadingEmail ??
+      loadingStates.isLoadingDiscord ||
+      loadingStates.isLoadingGoogle ||
+      loadingStates.isLoadingEmail ||
       false
     );
   }
@@ -129,29 +130,20 @@ export default function UserAuthForm({
               </div>
               <Input id="password" type="password" required />
             </div>
-            <Button type="submit" onClick={() => onSubmit} className="w-full">
+            <Button
+              type="submit"
+              onClick={() => {
+                setLoadingState({ isLoadingEmail: true });
+                onSubmit;
+              }}
+              disabled={isAnyLoading()}
+              className="w-full"
+            >
               Login
             </Button>
 
             <div className="flex justify-center">Or</div>
             <div className="grid grid-cols-2 gap-6">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => {
-                  setLoadingState({ isLoadingDiscord: true });
-                  signInWithDiscord;
-                }}
-                disabled={isAnyLoading()}
-              >
-                {loadingStates.isLoadingDiscord ? (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Icons.discord className="mr-2 h-4 w-4" />
-                )}{" "}
-                Discord
-              </Button>
-
               <Button
                 variant="outline"
                 type="button"
@@ -167,6 +159,23 @@ export default function UserAuthForm({
                   <Icons.google className="mr-2 h-4 w-4" />
                 )}{" "}
                 Google
+              </Button>
+
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  setLoadingState({ isLoadingDiscord: true });
+                  signInWithDiscord;
+                }}
+                disabled={isAnyLoading()}
+              >
+                {loadingStates.isLoadingDiscord ? (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Icons.discord className="mr-2 h-4 w-4" />
+                )}{" "}
+                Discord
               </Button>
             </div>
           </div>
