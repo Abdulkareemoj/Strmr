@@ -47,19 +47,9 @@ export function CommandMenu({ ...props }: DialogProps) {
 
   return (
     <>
-      <Button
-        variant="outline"
-        className={cn(
-          "text-muted-foreground relative w-full justify-start text-sm sm:pr-12 md:w-40 lg:w-64",
-        )}
-        onClick={() => setOpen(true)}
-        {...props}
-      >
-        <span className="hidden lg:inline-flex">Search</span>
-        <span className="inline-flex lg:hidden">Search...</span>
-        <kbd className="bg-muted pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-          <span className="text-xs">⌘</span>K
-        </kbd>
+      <Button variant="ghost" onClick={() => setOpen(true)} {...props}>
+        <span className="hidden text-base lg:block">⌘K</span>
+        <kbd className="bg-muted pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex"></kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
