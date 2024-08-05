@@ -5,11 +5,9 @@ import Layout from "~/components/Layout";
 
 const MyApp: AppType = ({ Component, pageProps: { ...pageProps } }) => {
   return (
-    <ThemeProvider>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </ThemeProvider>
+    <Layout>
+      <Component {...pageProps} />
+    </Layout>
   );
 };
 
