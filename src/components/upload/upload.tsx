@@ -5,12 +5,11 @@ import { FileUploader } from "~/components/upload/file-uploader";
 
 import { UploadedFilesCard } from "./uploaded-files-card";
 
-export function Uploader() {
+export function Uploader({ uploadPath }: { uploadPath: string }) {
   const { onUpload, progresses, uploadedFiles, isUploading } = useUploadFile(
-    "imageUploader",
+    uploadPath,
     { defaultUploadedFiles: [] },
   );
-
   return (
     <div className="space-y-6">
       <FileUploader
