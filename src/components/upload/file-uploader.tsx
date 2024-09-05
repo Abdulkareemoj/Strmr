@@ -8,6 +8,7 @@ import Dropzone, {
   type FileRejection,
 } from "react-dropzone";
 import { toast } from "sonner";
+import { createClient } from "~/utils/supabase/component";
 
 import { cn, formatBytes } from "~/lib/utils";
 import { useControllableState } from "~/lib/hooks";
@@ -15,80 +16,18 @@ import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { ScrollArea } from "~/components/ui/scroll-area";
 
+// Initialize Supabase client
+const supabase = createClient();
+
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Value of the uploader.
-   * @type File[]
-   * @default undefined
-   * @example value={files}
-   */
   value?: File[];
-
-  /**
-   * Function to be called when the value changes.
-   * @type (files: File[]) => void
-   * @default undefined
-   * @example onValueChange={(files) => setFiles(files)}
-   */
   onValueChange?: (files: File[]) => void;
-
-  /**
-   * Function to be called when files are uploaded.
-   * @type (files: File[]) => Promise<void>
-   * @default undefined
-   * @example onUpload={(files) => uploadFiles(files)}
-   */
   onUpload?: (files: File[]) => Promise<void>;
-
-  /**
-   * Progress of the uploaded files.
-   * @type Record<string, number> | undefined
-   * @default undefined
-   * @example progresses={{ "file1.png": 50 }}
-   */
   progresses?: Record<string, number>;
-
-  /**
-   * Accepted file types for the uploader.
-   * @type { [key: string]: string[]}
-   * @default
-   * ```ts
-   * { "image/*": [] }
-   * ```
-   * @example accept={["image/png", "image/jpeg"]}
-   */
   accept?: DropzoneProps["accept"];
-
-  /**
-   * Maximum file size for the uploader.
-   * @type number | undefined
-   * @default 1024 * 1024 * 2 // 2MB
-   * @example maxSize={1024 * 1024 * 2} // 2MB
-   */
   maxSize?: DropzoneProps["maxSize"];
-
-  /**
-   * Maximum number of files for the uploader.
-   * @type number | undefined
-   * @default 1
-   * @example maxFileCount={4}
-   */
   maxFileCount?: DropzoneProps["maxFiles"];
-
-  /**
-   * Whether the uploader should accept multiple files.
-   * @type boolean
-   * @default false
-   * @example multiple
-   */
   multiple?: boolean;
-
-  /**
-   * Whether the uploader is disabled.
-   * @type boolean
-   * @default false
-   * @example disabled
-   */
   disabled?: boolean;
 }
 
@@ -100,8 +39,9 @@ export function FileUploader(props: FileUploaderProps) {
     progresses,
     accept = {
       "image/*": [],
+      "video/*": [],
     },
-    maxSize = 1024 * 1024 * 2,
+    maxSize = 1024 * 1024 * 50, // 50MB for videos
     maxFileCount = 1,
     multiple = false,
     disabled = false,
@@ -160,7 +100,6 @@ export function FileUploader(props: FileUploaderProps) {
         });
       }
     },
-
     [files, maxFileCount, multiple, onUpload, setFiles],
   );
 
@@ -171,7 +110,6 @@ export function FileUploader(props: FileUploaderProps) {
     onValueChange?.(newFiles);
   }
 
-  // Revoke preview url when component unmounts
   React.useEffect(() => {
     return () => {
       if (!files) return;
@@ -181,8 +119,7 @@ export function FileUploader(props: FileUploaderProps) {
         }
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [files]);
 
   const isDisabled = disabled || (files?.length ?? 0) >= maxFileCount;
 
@@ -200,8 +137,8 @@ export function FileUploader(props: FileUploaderProps) {
           <div
             {...getRootProps()}
             className={cn(
-              "border-muted-foreground/25 hover:bg-muted/25 group relative grid h-52 w-full cursor-pointer place-items-center rounded-lg border-2 border-dashed px-5 py-2.5 text-center transition",
-              "ring-offset-background focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+              "group relative grid h-52 w-full cursor-pointer place-items-center rounded-lg border-2 border-dashed border-muted-foreground/25 px-5 py-2.5 text-center transition hover:bg-muted/25",
+              "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               isDragActive && "border-muted-foreground/50",
               isDisabled && "pointer-events-none opacity-60",
               className,
@@ -213,11 +150,11 @@ export function FileUploader(props: FileUploaderProps) {
               <div className="flex flex-col items-center justify-center gap-4 sm:px-5">
                 <div className="rounded-full border border-dashed p-3">
                   <UploadIcon
-                    className="text-muted-foreground size-7"
+                    className="size-7 text-muted-foreground"
                     aria-hidden="true"
                   />
                 </div>
-                <p className="text-muted-foreground font-medium">
+                <p className="font-medium text-muted-foreground">
                   Drop the files here
                 </p>
               </div>
@@ -225,15 +162,15 @@ export function FileUploader(props: FileUploaderProps) {
               <div className="flex flex-col items-center justify-center gap-4 sm:px-5">
                 <div className="rounded-full border border-dashed p-3">
                   <UploadIcon
-                    className="text-muted-foreground size-7"
+                    className="size-7 text-muted-foreground"
                     aria-hidden="true"
                   />
                 </div>
                 <div className="flex flex-col gap-px">
-                  <p className="text-muted-foreground font-medium">
+                  <p className="font-medium text-muted-foreground">
                     Drag {`'n'`} drop files here, or click to select files
                   </p>
-                  <p className="text-muted-foreground/70 text-sm">
+                  <p className="text-sm text-muted-foreground/70">
                     You can upload
                     {maxFileCount > 1
                       ? ` ${maxFileCount === Infinity ? "multiple" : maxFileCount}
@@ -277,10 +214,10 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
         {isFileWithPreview(file) ? <FilePreview file={file} /> : null}
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-col gap-px">
-            <p className="text-foreground/80 line-clamp-1 text-sm font-medium">
+            <p className="line-clamp-1 text-sm font-medium text-foreground/80">
               {file.name}
             </p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {formatBytes(file.size)}
             </p>
           </div>
@@ -323,11 +260,21 @@ function FilePreview({ file }: FilePreviewProps) {
         className="aspect-square shrink-0 rounded-md object-cover"
       />
     );
+  } else if (file.type.startsWith("video/")) {
+    return (
+      <video
+        src={file.preview}
+        width={48}
+        height={48}
+        controls
+        className="aspect-square shrink-0 rounded-md object-cover"
+      />
+    );
   }
 
   return (
     <FileTextIcon
-      className="text-muted-foreground size-10"
+      className="size-10 text-muted-foreground"
       aria-hidden="true"
     />
   );
