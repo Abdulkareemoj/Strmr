@@ -1,16 +1,7 @@
 import * as React from "react";
-// import { type UseUploadthingProps } from "@uploadthing/react";
-// import { useUploadThing } from "~/lib/uploadthing";
-// import { type OurFileRouter } from "~/app/api/uploadthing/core";
-// import type { UploadedFile } from "~/types";
 import { toast } from "sonner";
-// import type { UploadFilesOptions } from "uploadthing/types";
 import { getErrorMessage } from "~/lib/handle-error";
-// import { uploadFiles } from "~/lib/uploadthing";
-
-/**
- * @see https://github.com/radix-ui/primitives/blob/main/packages/react/use-callback-ref/src/useCallbackRef.tsx
- */
+import { createClient } from "~/utils/supabase/component";
 
 /**
  * A custom hook that converts a callback to a ref to avoid triggering re-renders when passed as a
@@ -34,9 +25,8 @@ function useCallbackRef<T extends (...args: never[]) => unknown>(
 export { useCallbackRef };
 
 /**
- * @see https://github.com/radix-ui/primitives/blob/main/packages/react/use-controllable-state/src/useControllableState.tsx
+ * A custom hook to manage controllable state
  */
-
 type UseControllableStateParams<T> = {
   prop?: T | undefined;
   defaultProp?: T | undefined;
@@ -44,14 +34,6 @@ type UseControllableStateParams<T> = {
 };
 
 type SetStateFn<T> = (prevState?: T) => T;
-
-interface UseUploadFileProps
-  extends Pick<
-    UploadFilesOptions<OurFileRouter, keyof OurFileRouter>,
-    "headers" | "onUploadBegin" | "onUploadProgress" | "skipPolling"
-  > {
-  defaultUploadedFiles?: UploadedFile[];
-}
 
 function useControllableState<T>({
   prop,
@@ -105,9 +87,26 @@ function useUncontrolledState<T>({
 
 export { useControllableState };
 
+interface UseUploadFileProps {
+  defaultUploadedFiles?: any[];
+  onUploadBegin?: () => void;
+  onUploadProgress?: (progress: number) => void;
+  headers?: Record<string, string>;
+  skipPolling?: boolean;
+}
+
+interface UploadedFile {
+  name: string;
+  path: string;
+}
+
+interface UseUploadFileProps {
+  defaultUploadedFiles?: UploadedFile[];
+}
+
 export function useUploadFile(
-  endpoint: keyof OurFileRouter,
-  { defaultUploadedFiles = [], ...props }: UseUploadFileProps = {},
+  folder: string,
+  { defaultUploadedFiles = [] }: UseUploadFileProps = {},
 ) {
   const [uploadedFiles, setUploadedFiles] =
     React.useState<UploadedFile[]>(defaultUploadedFiles);
@@ -117,22 +116,37 @@ export function useUploadFile(
   const [isUploading, setIsUploading] = React.useState(false);
 
   async function onUpload(files: File[]) {
+    const supabase = createClient();
     setIsUploading(true);
     try {
-      const res = await uploadFiles(endpoint, {
-        ...props,
-        files,
-        onUploadProgress: ({ file, progress }) => {
-          setProgresses((prev) => {
-            return {
-              ...prev,
-              [file]: progress,
-            };
+      const uploads = files.map(async (file) => {
+        const filePath = `${folder}/${file.name}`;
+        const { data, error } = await supabase.storage
+          .from(`${process.env.FOLDER_NAME}`)
+          .upload(filePath, file, {
+            onUploadProgress: (progressEvent: {
+              loaded: number;
+              total: number;
+            }) => {
+              const progress =
+                (progressEvent.loaded / progressEvent.total) * 100;
+              setProgresses((prev) => ({
+                ...prev,
+                [file.name]: progress,
+              }));
+            },
           });
-        },
+
+        if (error) {
+          console.error("Error uploading file:", error);
+          return;
+        }
+
+        return { name: file.name, path: data?.path };
       });
 
-      setUploadedFiles((prev) => (prev ? [...prev, ...res] : res));
+      const res = await Promise.all(uploads);
+      setUploadedFiles((prev) => [...prev, ...res]);
     } catch (err) {
       toast.error(getErrorMessage(err));
     } finally {
@@ -146,27 +160,5 @@ export function useUploadFile(
     uploadedFiles,
     progresses,
     isUploading,
-  };
-}
-
-interface UseUploadThingyProps
-  extends UseUploadthingProps<OurFileRouter, keyof OurFileRouter> {}
-
-export function useUploadThingy(
-  endpoint: keyof OurFileRouter,
-  props: UseUploadThingyProps = {},
-) {
-  const [progress, setProgress] = React.useState(0);
-  const { startUpload, isUploading } = useUploadThing(endpoint, {
-    onUploadProgress: () => {
-      setProgress(progress);
-    },
-    ...props,
-  });
-
-  return {
-    startUpload,
-    isUploading,
-    progress,
   };
 }
