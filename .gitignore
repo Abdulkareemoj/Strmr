@@ -11,6 +11,7 @@
 # database
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
+db.sqlite
 
 # next.js
 /.next/
@@ -40,4 +41,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-public/An Overview of Agile Development.mp4
+
+# idea files
+.idea
