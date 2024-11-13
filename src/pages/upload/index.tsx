@@ -143,12 +143,15 @@ export default function Upload() {
           {error && <p>Error: {error}</p>}
         </form>
       </Form> */}
-      <div className="">
-        <div className="text-2xl font-bold">Video Upload</div>
-        <div className="text-xl font-bold">Please specify the video type</div>
+
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Video Upload</h1>
+        <p className="text-xl text-muted-foreground">
+          Please specify the video type
+        </p>
       </div>
-      <Tabs defaultValue="video" className="">
-        <div className="flex justify-center">
+      <Tabs defaultValue="video" className="mx-auto w-full max-w-4xl">
+        <div className="mb-6 flex justify-center">
           <TabsList className="grid w-full max-w-sm grid-cols-2">
             <TabsTrigger value="video">Video</TabsTrigger>
             <TabsTrigger value="short">Short</TabsTrigger>
