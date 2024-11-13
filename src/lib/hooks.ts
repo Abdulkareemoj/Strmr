@@ -2,7 +2,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { getErrorMessage } from "~/lib/handle-error";
 import { createClient } from "~/utils/supabase/component";
-
+import { type UploadedFile } from "~/types/types";
 /**
  * A custom hook that converts a callback to a ref to avoid triggering re-renders when passed as a
  * prop or avoid re-executing effects when passed as a dependency
@@ -93,11 +93,6 @@ interface UseUploadFileProps {
   onUploadProgress?: (progress: number) => void;
   headers?: Record<string, string>;
   skipPolling?: boolean;
-}
-
-interface UploadedFile {
-  name: string;
-  path: string;
 }
 
 interface UseUploadFileProps {

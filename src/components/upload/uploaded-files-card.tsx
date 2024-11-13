@@ -9,12 +9,7 @@ import {
 } from "~/components/ui/card";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { EmptyCard } from "~/components/upload/empty-card";
-
-interface UploadedFile {
-  key: string;
-  url: string;
-  name: string;
-}
+import { type UploadedFile } from "~/types/types";
 
 interface UploadedFilesCardProps {
   uploadedFiles: UploadedFile[];
@@ -30,28 +25,23 @@ export function UploadedFilesCard({ uploadedFiles }: UploadedFilesCardProps) {
       <CardContent>
         {uploadedFiles.length > 0 ? (
           <ScrollArea className="pb-4">
-            <div className="flex w-max space-x-2.5">
-              {uploadedFiles.map((file) => (
-                <div key={file.key} className="relative aspect-video w-64">
+            {uploadedFiles.map((file) => (
+              <div key={file.key} className="relative aspect-video w-64">
+                {file.url ? (
                   <Image
                     src={file.url}
                     alt={file.name}
                     fill
                     sizes="(min-width: 640px) 640px, 100vw"
-                    loading="lazy"
-                    className="rounded-md object-cover"
                   />
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
+                ) : (
+                  <div className="text-red-500">URL not available</div>
+                )}
+              </div>
+            ))}
           </ScrollArea>
         ) : (
-          <EmptyCard
-            title="No files uploaded"
-            description="Upload some files to see them here"
-            className="w-full"
-          />
+          <EmptyCard title={""} />
         )}
       </CardContent>
     </Card>

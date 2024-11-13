@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Image from "next/image";
 import { Cross2Icon, UploadIcon } from "@radix-ui/react-icons";
@@ -182,7 +180,6 @@ const FileUploader = React.forwardRef<HTMLDivElement, FileUploaderProps>(
           }
         });
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const isDisabled = disabled || (files?.length ?? 0) >= maxFiles;
@@ -294,11 +291,11 @@ const FileUploaderTrigger = React.forwardRef<
         <div className="flex flex-col items-center justify-center gap-4 sm:px-5">
           <div className="rounded-full border border-dashed p-3">
             <UploadIcon
-              className="text-muted-foreground size-7"
+              className="size-7 text-muted-foreground"
               aria-hidden="true"
             />
           </div>
-          <p className="text-muted-foreground font-medium">
+          <p className="font-medium text-muted-foreground">
             Drop the files here
           </p>
         </div>
@@ -306,15 +303,15 @@ const FileUploaderTrigger = React.forwardRef<
         <div className="flex flex-col items-center justify-center gap-4 sm:px-5">
           <div className="rounded-full border border-dashed p-3">
             <UploadIcon
-              className="text-muted-foreground size-7"
+              className="size-7 text-muted-foreground"
               aria-hidden="true"
             />
           </div>
           <div className="space-y-px">
-            <p className="text-muted-foreground font-medium">
+            <p className="font-medium text-muted-foreground">
               Drag {`'n'`} drop files here, or click to select files
             </p>
-            <p className="text-muted-foreground/70 text-sm">
+            <p className="text-sm text-muted-foreground/70">
               You can upload
               {maxFiles > 1
                 ? ` ${maxFiles === Infinity ? "multiple" : maxFiles}
@@ -361,10 +358,10 @@ const FileUploaderItem = React.forwardRef<
         ) : null}
         <div className="flex w-full flex-col gap-2">
           <div className="space-y-px">
-            <p className="text-foreground/80 line-clamp-1 text-sm font-medium">
+            <p className="line-clamp-1 text-sm font-medium text-foreground/80">
               {file.name}
             </p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {formatBytes(file.size)}
             </p>
           </div>
