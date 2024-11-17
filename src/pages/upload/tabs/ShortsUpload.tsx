@@ -37,8 +37,8 @@ export default function ShortsUpload() {
     for (const file of filesToUpload) {
       try {
         const { data, error } = await supabase.storage
-          .from("shorts")
-          .upload(`uploads/${file.name}`, file, {
+          .from("strmrvids")
+          .upload(`shorts/${file.name}`, file, {
             cacheControl: "3600",
             upsert: false,
             onUploadProgress: (progress) => {
@@ -52,8 +52,8 @@ export default function ShortsUpload() {
         const {
           data: { publicUrl },
         } = supabase.storage
-          .from("shorts")
-          .getPublicUrl(`uploads/${file.name}`);
+          .from("strmrvids")
+          .getPublicUrl(`shorts/${file.name}`);
 
         setUploadedFiles((prev) => [
           ...prev,

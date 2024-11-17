@@ -37,8 +37,8 @@ export default function VideoUpload() {
     for (const file of filesToUpload) {
       try {
         const { data, error } = await supabase.storage
-          .from("videos")
-          .upload(`uploads/${file.name}`, file, {
+          .from("strmrvids")
+          .upload(`videos/${file.name}`, file, {
             cacheControl: "3600",
             upsert: false,
             onUploadProgress: (progress) => {
@@ -52,8 +52,8 @@ export default function VideoUpload() {
         const {
           data: { publicUrl },
         } = supabase.storage
-          .from("videos")
-          .getPublicUrl(`uploads/${file.name}`);
+          .from("strmrvids")
+          .getPublicUrl(`videos/${file.name}`);
 
         setUploadedFiles((prev) => [
           ...prev,
@@ -79,7 +79,7 @@ export default function VideoUpload() {
   const onDelete = async (file: UploadedFile) => {
     try {
       const { error } = await supabase.storage
-        .from("videos")
+        .from("strmrvids")
         .remove([file.key]);
 
       if (error) throw error;
