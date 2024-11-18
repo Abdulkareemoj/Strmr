@@ -1,16 +1,14 @@
-"use client";
-
 import * as React from "react";
 import { createClient } from "~/utils/supabase/component";
 import { toast } from "sonner";
-import { FileTextIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import { FileTextIcon, Trash2Icon, UploadIcon, XIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Input } from "~/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
-// Initialize Supabase client (replace with your actual Supabase URL and anon key)
 const supabase = createClient();
 
 interface UploadedFile {
@@ -21,33 +19,56 @@ interface UploadedFile {
 
 export default function ShortsUpload() {
   const [files, setFiles] = React.useState<File[]>([]);
+  const [previews, setPreviews] = React.useState<string[]>([]);
   const [uploading, setUploading] = React.useState(false);
   const [progresses, setProgresses] = React.useState<Record<string, number>>(
     {},
   );
   const [uploadedFiles, setUploadedFiles] = React.useState<UploadedFile[]>([]);
+  const [errors, setErrors] = React.useState<string[]>([]);
 
-  const onUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filesToUpload = event.target.files;
-    if (!filesToUpload) return;
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles) return;
 
+    const newFiles = Array.from(selectedFiles);
+    setFiles(newFiles);
+
+    // Create previews
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    setPreviews(newPreviews);
+  };
+
+  const onUpload = async () => {
     setUploading(true);
-    setFiles(Array.from(filesToUpload));
+    setErrors([]);
 
-    for (const file of filesToUpload) {
+    for (const file of files) {
       try {
+        setProgresses((prev) => ({ ...prev, [file.name]: 0 }));
+
+        // Check if file already exists
+        const { data: existingFiles, error: listError } = await supabase.storage
+          .from("strmrvids")
+          .list("shorts", { search: file.name });
+
+        if (listError) throw listError;
+
+        if (existingFiles && existingFiles.length > 0) {
+          throw new Error(
+            `A file named ${file.name} already exists. Please rename your file and try again.`,
+          );
+        }
+
         const { data, error } = await supabase.storage
           .from("strmrvids")
           .upload(`shorts/${file.name}`, file, {
             cacheControl: "3600",
-            upsert: false,
-            onUploadProgress: (progress) => {
-              const percent = (progress.loaded / progress.total) * 100;
-              setProgresses((prev) => ({ ...prev, [file.name]: percent }));
-            },
           });
 
         if (error) throw error;
+
+        setProgresses((prev) => ({ ...prev, [file.name]: 100 }));
 
         const {
           data: { publicUrl },
@@ -67,19 +88,28 @@ export default function ShortsUpload() {
         toast.success(`Short ${file.name} uploaded successfully`);
       } catch (error) {
         console.error("Error uploading short:", error);
-        toast.error(`Failed to upload ${file.name}`);
+        setErrors((prev) => [
+          ...prev,
+          `Failed to upload ${file.name}: ${error.message || "Unknown error"}`,
+        ]);
+        setProgresses((prev) => {
+          const newProgresses = { ...prev };
+          delete newProgresses[file.name];
+          return newProgresses;
+        });
       }
     }
 
     setUploading(false);
     setFiles([]);
+    setPreviews([]);
     setProgresses({});
   };
 
   const onDelete = async (file: UploadedFile) => {
     try {
       const { error } = await supabase.storage
-        .from("shorts")
+        .from("strmrvids")
         .remove([file.key]);
 
       if (error) throw error;
@@ -88,7 +118,10 @@ export default function ShortsUpload() {
       toast.success(`Short ${file.name} deleted successfully`);
     } catch (error) {
       console.error("Error deleting short:", error);
-      toast.error(`Failed to delete ${file.name}`);
+      setErrors((prev) => [
+        ...prev,
+        `Failed to delete ${file.name}: ${error.message || "Unknown error"}`,
+      ]);
     }
   };
 
@@ -114,18 +147,58 @@ export default function ShortsUpload() {
             type="file"
             accept="video/*"
             className="hidden"
-            onChange={onUpload}
+            onChange={handleFileSelect}
             multiple
             disabled={uploading}
           />
         </label>
       </div>
+
+      {previews.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Previews</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {previews.map((preview, index) => (
+              <div key={index} className="relative">
+                <video src={preview} className="h-auto w-full" controls />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute right-2 top-2"
+                  onClick={() => {
+                    setFiles(files.filter((_, i) => i !== index));
+                    setPreviews(previews.filter((_, i) => i !== index));
+                  }}
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <Button onClick={onUpload} disabled={uploading}>
+            {uploading ? "Uploading..." : "Upload Selected Shorts"}
+          </Button>
+        </div>
+      )}
+
       {Object.entries(progresses).map(([fileName, progress]) => (
         <div key={fileName} className="space-y-2">
           <p>{fileName}</p>
           <Progress value={progress} className="w-full" />
         </div>
       ))}
+
+      {errors.length > 0 && (
+        <div className="space-y-2">
+          {errors.map((error, index) => (
+            <Alert key={index} variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ))}
+        </div>
+      )}
+
       <UploadedFilesCard uploadedFiles={uploadedFiles} onDelete={onDelete} />
     </div>
   );
@@ -138,6 +211,8 @@ function UploadedFilesCard({
   uploadedFiles: UploadedFile[];
   onDelete: (file: UploadedFile) => void;
 }) {
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="flex flex-col space-y-1.5 p-6">
@@ -168,7 +243,7 @@ function UploadedFilesCard({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(file.url, "_blank")}
+                      onClick={() => setPreviewUrl(file.url)}
                     >
                       Preview
                     </Button>
@@ -196,6 +271,21 @@ function UploadedFilesCard({
           </div>
         )}
       </div>
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="relative w-full max-w-3xl">
+            <video src={previewUrl} controls className="w-full" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="absolute right-2 top-2"
+              onClick={() => setPreviewUrl(null)}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
