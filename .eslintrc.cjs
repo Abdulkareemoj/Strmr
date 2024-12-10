@@ -1,10 +1,10 @@
 /** @type {import("eslint").Linter.Config} */
-const config = {
+module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: true,
   },
-  plugins: ["@typescript-eslint/eslint-plugin"],
+  plugins: ["@typescript-eslint"],
   extends: [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended-type-checked",
@@ -37,4 +37,3 @@ const config = {
     ],
   },
 };
-module.exports = config;
