@@ -61,7 +61,7 @@ export default function LoginBtn() {
   return (
     <>
       Not signed in <br />
-      <Button onClick={() => router.push("/sign-in")}>Sign in</Button>
+      <Button onClick={() => router.push("/signin")}>Sign in</Button>
     </>
   );
 }
