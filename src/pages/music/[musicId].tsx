@@ -2,15 +2,14 @@
 // import { type GetServerSideProps } from "next";
 // import { useRouter } from "next/router";
 
-// export default function AudioPage() {
-//   const router = useRouter();
-//   const { musicId } = router.query as { musicId: string };
+export default function AudioPage() {
+  //   const router = useRouter();
+  //   const { musicId } = router.query as { musicId: string };
 
-//   return <MusicPlayer id={musicId} />;
-// }
+  return <div>help</div>;
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   return {
-//     props: { query: context.query },
-//   };
-// };
+  // export const getServerSideProps: GetServerSideProps = async (context) => {
+  //   return {
+  //     props: { query: context.query },
+  //   };
+}

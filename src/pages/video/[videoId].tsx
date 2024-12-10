@@ -2,12 +2,12 @@
 // import { type GetServerSideProps } from "next";
 // import { useRouter } from "next/router";
 
-// export default function VideoPage() {
-//   const router = useRouter();
-//   const { videoId } = router.query as { videoId: string };
+export default function VideoPage() {
+  //   const router = useRouter();
+  //   const { videoId } = router.query as { videoId: string };
 
-//   return <VideoPlayer id={videoId} />;
-// }
+  return <div>help</div>;
+}
 
 // export const getServerSideProps: GetServerSideProps = async (context) => {
 //   return {
