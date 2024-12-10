@@ -1,28 +1,49 @@
-# Create T3 App
+# Strmr
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+### This is a T3 Stack project bootstrapped with create-t3-app
 
-## What's next? How do I make an app with this?
+## Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Utilizes Next.js with Supabase for authentication
+- Styled with TailwindCSS
+- Prisma as ORM
+- Uses Supabase for backend and storage services
+- Shadcn UI components for UI elements
+- Vidstack for the Video Player
+-
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+# Installation
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+To install and set up the project, follow these steps:
 
-## Learn More
+Clone the repository:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+```bash
+git clone https://github.com/Abdulkareemoj/Strmr.git
+cd Strmr
+```
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+Install dependencies
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+```bash
+npm install
+```
 
-## How do I deploy this?
+## Set up with Supabase
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- Create a new project on [Supabase](https://supabase.io/)
+- The project already has a `.env.example` file. Rename it to `.env.local` and fill in the required details from your Supabase project.
+- To make it easier if youre deploying on vercel, you can use the supabase vercel integration to automatically set up the environment variables for you.
+- However to get the supabase url and key, you can find them in the settings of your supabase project.
+- The other values are also on the dashboard but will take a little bit of searching to find them.
+- When you find the rest of the environment variables run the following commands to set up the database schema and seed the database with some data:
+
+```bash
+npx prisma generate ##To generate the prisma client
+npx prisma db push ##To push the schema to the database
+
+```
+
+# License
+
+This project is licensed under the MIT License.
