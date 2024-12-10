@@ -20,7 +20,6 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { toast } from "~/components/ui/use-toast";
 
 import { Separator } from "~/components/ui/separator";
-import { AppearanceForm } from "./appearance-form";
 import SettingsLayout from "~/components/SettingsLayout";
 
 const appearanceFormSchema = z.object({
