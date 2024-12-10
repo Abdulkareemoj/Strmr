@@ -22,13 +22,13 @@ export default function Component() {
               by The Cosmic Crooners
             </p>
             <p className="text-gray-500 dark:text-gray-400">
-              From the album "Interstellar Melodies"
+              From the album &ldquo;Interstellar Melodies&ldquo;
             </p>
           </div>
         </div>
         <div className="flex flex-col items-center">
           <Slider
-            className="[&_[role=slider]]:bg-primary [&>span:first-child_span]:bg-primary w-full [&>span:first-child]:h-1 [&>span:first-child]:bg-gray-300 dark:[&>span:first-child]:bg-gray-600 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:transition-transform [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-0"
+            className="w-full [&>span:first-child]:h-1 [&>span:first-child]:bg-gray-300 dark:[&>span:first-child]:bg-gray-600 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:transition-transform [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-0 [&_[role=slider]]:bg-primary"
             defaultValue={[30]}
           />
           <div className="mt-4 flex w-full items-center justify-between">

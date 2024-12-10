@@ -1,7 +1,12 @@
 import * as React from "react";
 import { createClient } from "~/utils/supabase/component";
 import { toast } from "sonner";
-import { FileTextIcon, Trash2Icon, UploadIcon, XIcon } from "lucide-react";
+import {
+  FileTextIcon,
+  TrashIcon,
+  UploadIcon,
+  Cross1Icon,
+} from "@radix-ui/react-icons";
 
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
@@ -90,7 +95,9 @@ export default function ShortsUpload() {
         console.error("Error uploading short:", error);
         setErrors((prev) => [
           ...prev,
-          `Failed to upload ${file.name}: ${error.message || "Unknown error"}`,
+          `Failed to upload ${file.name}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
         ]);
         setProgresses((prev) => {
           const newProgresses = { ...prev };
@@ -120,7 +127,9 @@ export default function ShortsUpload() {
       console.error("Error deleting short:", error);
       setErrors((prev) => [
         ...prev,
-        `Failed to delete ${file.name}: ${error.message || "Unknown error"}`,
+        `Failed to delete ${file.name}: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       ]);
     }
   };
@@ -170,7 +179,7 @@ export default function ShortsUpload() {
                     setPreviews(previews.filter((_, i) => i !== index));
                   }}
                 >
-                  <XIcon className="h-4 w-4" />
+                  <Cross1Icon className="h-4 w-4" />
                 </Button>
               </div>
             ))}
@@ -252,7 +261,7 @@ function UploadedFilesCard({
                       size="sm"
                       onClick={() => onDelete(file)}
                     >
-                      <Trash2Icon className="h-4 w-4" />
+                      <TrashIcon className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

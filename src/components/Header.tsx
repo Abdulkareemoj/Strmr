@@ -1,4 +1,8 @@
-import { Menu, Package2, Search } from "lucide-react";
+import {
+  HamburgerMenuIcon,
+  BoxIcon,
+  MagnifyingGlassIcon,
+} from "@radix-ui/react-icons";
 import Link from "next/link";
 
 import { Button } from "./ui/button";
@@ -11,38 +15,38 @@ import { CommandMenu } from "./CommandMenu";
 
 export default function Header() {
   return (
-    <header className="bg-background/70 sticky top-0 z-50 flex h-16 items-center gap-4 border-b px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/70 px-4 backdrop-blur md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link
           href="/"
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
         >
-          <Package2 className="h-6 w-6" />
+          <BoxIcon className="h-6 w-6" />
           <span className="hidden font-bold sm:inline-block">
             {siteConfig.name}
           </span>
         </Link>
         <Link
           href="/"
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Home
         </Link>
         <Link
           href="/trending"
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Trending
         </Link>
         <Link
           href="/shorts"
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Shorts
         </Link>
         <Link
           href="/music"
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Music
         </Link>
@@ -56,7 +60,7 @@ export default function Header() {
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-            <Menu className="h-5 w-5" />
+            <HamburgerMenuIcon className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </SheetTrigger>
@@ -66,7 +70,7 @@ export default function Header() {
               href="/"
               className="flex items-center gap-2 text-lg font-semibold"
             >
-              <Package2 className="h-6 w-6" />
+              <BoxIcon className="h-6 w-6" />
               <span className="hidden font-bold sm:inline-block">
                 {siteConfig.name}
               </span>
@@ -104,7 +108,7 @@ export default function Header() {
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <form className="ml-auto flex-1 sm:flex-initial">
           <div className="relative">
-            <Search className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
+            <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search products..."

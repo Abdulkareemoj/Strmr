@@ -1,5 +1,5 @@
 import { type Metadata } from "next";
-import Image from "next/image";
+// import Image from "next/image";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 
 import { Button } from "~/components/ui/button";
@@ -53,7 +53,7 @@ export default function MusicPage() {
                     <h2 className="text-2xl font-semibold tracking-tight">
                       Listen Now
                     </h2>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-sm text-muted-foreground">
                       Top picks for you. Updated daily.
                     </p>
                   </div>
@@ -80,7 +80,7 @@ export default function MusicPage() {
                   <h2 className="text-2xl font-semibold tracking-tight">
                     Made for You
                   </h2>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-sm text-muted-foreground">
                     Your personal playlists. Updated daily.
                   </p>
                 </div>
@@ -112,7 +112,7 @@ export default function MusicPage() {
                     <h2 className="text-2xl font-semibold tracking-tight">
                       New Episodes
                     </h2>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-sm text-muted-foreground">
                       Your favorite podcasts. Updated daily.
                     </p>
                   </div>

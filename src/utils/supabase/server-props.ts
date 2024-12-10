@@ -10,7 +10,7 @@ export function createClient({ req, res }: GetServerSidePropsContext) {
         getAll() {
           return Object.keys(req.cookies).map((name) => ({
             name,
-            value: req.cookies[name] || "",
+            value: req.cookies[name] ?? "",
           }));
         },
         setAll(cookiesToSet) {

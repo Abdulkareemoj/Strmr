@@ -1,110 +1,76 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
+import { createClient } from "~/utils/supabase/component";
+import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import "@vidstack/react/player/styles/default/theme.css";
+import "@vidstack/react/player/styles/default/layouts/video.css";
 
-export const metadata: Metadata = {
-  title: "Videos",
-  description: "Videos Page",
-};
+const supabase = createClient();
+
+interface Video {
+  id: string;
+  title: string;
+  description: string;
+  public_url: string;
+}
 export default function VideoList() {
-  const [videos, setVideos] = useState([]);
-  const [page, setPage] = useState(1);
+  const [videos, setVideos] = React.useState<Video[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchVideos = async () => {
-      const res = await fetch(`/api/videoURLs?page=${page}&limit=10`);
-      const data = await res.json();
+  React.useEffect(() => {
+    (async () => {
+      try {
+        await fetchVideos();
+      } catch (err) {
+        console.error("Error during fetchVideos execution:", err);
+      }
+    })().catch((err) => console.error("Unhandled error:", err));
+  }, []);
+
+  async function fetchVideos() {
+    setLoading(true);
+    setError(null);
+
+    const { data, error } = await supabase
+      .from("video_metadata")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching videos:", error);
+      setError("Failed to load videos. Please try again.");
+    } else {
       setVideos(data);
-    };
+    }
+    setLoading(false);
+  }
 
-    void fetchVideos();
-  }, [page]);
+  if (loading) {
+    return <div>Loading videos...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
-    <div>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {videos.map((video) => (
-        <div key={video.id}>
-          <h2>{video.title}</h2>
-          <p>{video.description}</p>
-          {/* Add a video player here */}
+        <div
+          key={video.id}
+          className="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <MediaPlayer title={video.title}>
+            <MediaProvider>
+              <source src={video.public_url} type="video/mp4" />
+            </MediaProvider>
+          </MediaPlayer>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold">{video.title}</h3>
+            <p className="text-sm text-gray-500">{video.description}</p>
+          </div>
         </div>
       ))}
-      <button
-        onClick={() => setPage((prevPage) => prevPage - 1)}
-        disabled={page === 1}
-      >
-        Previous
-      </button>
-      <button onClick={() => setPage((prevPage) => prevPage + 1)}>Next</button>
     </div>
   );
 }
-export async function getServerSideProps() {}
-
-// import { useEffect, useState } from "react";
-
-// export default function VideoList() {
-//   const [videos, setVideos] = useState([]);
-
-//   useEffect(() => {
-//     async function fetchVideos() {
-//       const response = await fetch("/api/videoURLs");
-//       const data = await response.json();
-//       setVideos(data);
-//     }
-
-//     fetchVideos();
-//   }, []);
-
-//   return (
-//     <div>
-//       {videos.map((video) => (
-//         <video key={video.id} src={video.url} controls />
-//       ))}
-//     </div>
-//   );
-// }
-
-/////infinite scroll
-
-// import { useEffect, useState, useRef } from 'react';
-
-// export default function VideoList() {
-//   const [videos, setVideos] = useState([]);
-//   const [page, setPage] = useState(1);
-//   const [total, setTotal] = useState(0);
-//   const loader = useRef(null);
-
-//   useEffect(() => {
-//     const observer = new IntersectionObserver(handleObserver, { root: null, rootMargin: '20px', threshold: 1.0 });
-
-//     if (loader.current) {
-//       observer.observe(loader.current)
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     async function fetchVideos() {
-//       const response = await fetch(`/api/videos?page=${page}&pageSize=10`);
-//       const data = await response.json();
-//       setVideos((prevVideos) => [...prevVideos, ...data.videos]);
-//       setTotal(data.total);
-//     }
-
-//     fetchVideos();
-//   }, [page]);
-
-//   function handleObserver(entities: IntersectionObserverEntry[], observer: IntersectionObserver) {
-//     const target = entities[0];
-//     if (target.isIntersecting) {
-//       setPage((prevPage) => prevPage + 1);
-//     }
-//   }
-
-//   return (
-//     <div>
-//       {videos.map((video) => (
-//         <video key={video.id} src={video.url} controls />
-//       ))}
-//       {videos.length < total && <div ref={loader}>Loading...</div>}
-//     </div>
-//   );
-// }

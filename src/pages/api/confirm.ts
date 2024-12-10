@@ -31,7 +31,7 @@ export default async function handler(
     if (error) {
       console.error(error);
     } else {
-      next = stringOrFirstString(queryParams.next) || "/";
+      next = stringOrFirstString(queryParams.next) ?? "/";
     }
   }
 
