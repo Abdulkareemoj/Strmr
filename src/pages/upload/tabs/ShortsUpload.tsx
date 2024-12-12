@@ -166,7 +166,7 @@ export default function ShortsUpload() {
       {previews.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Previews</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 place-content-center gap-4">
             {previews.map((preview, index) => (
               <div key={index} className="relative">
                 <video src={preview} className="h-auto w-full" controls />
