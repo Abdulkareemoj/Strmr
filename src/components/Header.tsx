@@ -50,12 +50,6 @@ export default function Header() {
         >
           Music
         </Link>
-        {/* <Link
-          href="#"
-          className="text-foreground hover:text-foreground transition-colors"
-        >
-          Settings
-        </Link> */}
       </nav>
       <Sheet>
         <SheetTrigger asChild>
