@@ -1,15 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import VideoPlayer from "~/components/VideoPlayer";
-import { env } from "~/env";
+
+interface VideoData {
+  name: string;
+  url: string;
+}
 
 export default function VideoPage() {
   const router = useRouter();
   const { videoId } = router.query;
-  const [videoData, setVideoData] = useState<{
-    name: string;
-    url: string;
-  } | null>(null);
+  const [videoData, setVideoData] = useState<VideoData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,7 +26,7 @@ export default function VideoPage() {
         if (!response.ok) {
           throw new Error("Failed to fetch video data");
         }
-        const data = await response.json();
+        const data: VideoData = await response.json();
         setVideoData(data);
       } catch (err) {
         console.error("Error fetching video:", err);
@@ -31,7 +34,10 @@ export default function VideoPage() {
       }
     }
 
-    fetchVideoData();
+    fetchVideoData().catch((err) => {
+      console.error("Error in useEffect:", err);
+      setError("An unexpected error occurred.");
+    });
   }, [videoId]);
 
   if (error) {

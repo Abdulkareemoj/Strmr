@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "~/utils/supabase/component";
 
 const supabase = createClient();
@@ -11,7 +11,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { key } = req.body;
+  const { key } = req.body as { key?: string };
 
   if (!key) {
     return res.status(400).json({ error: "No file key provided" });

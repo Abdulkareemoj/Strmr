@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "~/utils/supabase/component";
 
 const supabase = createClient();
@@ -10,7 +10,7 @@ export default async function handler(
   if (req.method === "GET") {
     const { id } = req.query;
 
-    if (id) {
+    if (id && typeof id === "string") {
       // Fetch a specific video
       try {
         const { data, error } = await supabase.storage
@@ -23,7 +23,7 @@ export default async function handler(
           return res.status(404).json({ error: "Video not found" });
         }
 
-        res.status(200).json({ name: id as string, url: data.signedUrl });
+        res.status(200).json({ name: id, url: data.signedUrl });
       } catch (error) {
         console.error("Error fetching video:", error);
         res.status(500).json({ error: "Failed to fetch video" });
@@ -40,7 +40,7 @@ export default async function handler(
         if (error) throw error;
 
         const videoFiles = data.filter((item) =>
-          item.name.match(/\.(mp4|webm|ogg)$/i),
+          /\.(mp4|webm|ogg)$/i.test(item.name),
         );
 
         const videosWithUrls = await Promise.all(

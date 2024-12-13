@@ -1,4 +1,7 @@
-import { NextApiRequest, NextApiResponse } from "next";
+/* eslint-disable  @typescript-eslint/no-unsafe-argument */
+/* eslint-disable  @typescript-eslint/no-unsafe-assignment */
+
+import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "~/utils/supabase/component";
 
 const supabase = createClient();
