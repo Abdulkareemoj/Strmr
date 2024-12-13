@@ -134,7 +134,7 @@ export default function UserAuthForm({
               type="submit"
               onClick={() => {
                 setLoadingState({ isLoadingEmail: true });
-                // onSubmit;
+                onSubmit;
               }}
               disabled={isAnyLoading()}
               className="w-full"
@@ -149,7 +149,7 @@ export default function UserAuthForm({
                 type="button"
                 onClick={() => {
                   setLoadingState({ isLoadingGoogle: true });
-                  // signInWithGoogle;
+                  signInWithGoogle;
                 }}
                 disabled={isAnyLoading()}
               >
@@ -166,7 +166,7 @@ export default function UserAuthForm({
                 type="button"
                 onClick={() => {
                   setLoadingState({ isLoadingDiscord: true });
-                  // signInWithDiscord;
+                  signInWithDiscord;
                 }}
                 disabled={isAnyLoading()}
               >
