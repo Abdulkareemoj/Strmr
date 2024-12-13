@@ -6,22 +6,20 @@ import {
   plyrLayoutIcons,
 } from "@vidstack/react/player/layouts/plyr";
 
-export default function VideoPlayer() {
-  return (
-    <>
-      <main>
-        <MediaPlayer title="help" src="/An Overview of Agile Development.mp4  ">
-          <MediaProvider />
-          <PlyrLayout
-            thumbnails="https://image.mux.com/VZtzUzGRv02OhRnZCxcNg49OilvolTqdnFLEqBsTwaxU/storyboard.vtt"
-            icons={plyrLayoutIcons}
-          />
-        </MediaPlayer>
-      </main>
-    </>
-  );
+interface VideoPlayerProps {
+  src: string;
 }
 
+export default function VideoPlayer({ src }: VideoPlayerProps) {
+  return (
+    <main>
+      <MediaPlayer title={src} src={src}>
+        <MediaProvider />
+        <PlyrLayout icons={plyrLayoutIcons} />
+      </MediaPlayer>
+    </main>
+  );
+}
 {
   /* <video
         src={`/api/videos/?videoID=${id}`}

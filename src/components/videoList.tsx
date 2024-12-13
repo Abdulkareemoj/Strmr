@@ -1,48 +1,38 @@
 import * as React from "react";
-import { createClient } from "~/utils/supabase/component";
-import { MediaPlayer, MediaProvider } from "@vidstack/react";
-import "@vidstack/react/player/styles/default/theme.css";
-import "@vidstack/react/player/styles/default/layouts/video.css";
-
-const supabase = createClient();
+import Link from "next/link";
 
 interface Video {
-  id: string;
-  title: string;
-  description: string;
-  public_url: string;
+  name: string;
+  publicUrl: string;
 }
+
 export default function VideoList() {
   const [videos, setVideos] = React.useState<Video[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    (async () => {
-      try {
-        await fetchVideos();
-      } catch (err) {
-        console.error("Error during fetchVideos execution:", err);
-      }
-    })().catch((err) => console.error("Unhandled error:", err));
+    fetchVideos();
   }, []);
 
   async function fetchVideos() {
-    setLoading(true);
-    setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-    const { data, error } = await supabase
-      .from("video_metadata")
-      .select("*")
-      .order("created_at", { ascending: false });
+      const response = await fetch("/api/videos");
+      if (!response.ok) {
+        throw new Error("Failed to fetch videos");
+      }
 
-    if (error) {
+      const data = await response.json();
+      setVideos(data);
+    } catch (error) {
       console.error("Error fetching videos:", error);
       setError("Failed to load videos. Please try again.");
-    } else {
-      setVideos(data);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   if (loading) {
@@ -57,17 +47,23 @@ export default function VideoList() {
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {videos.map((video) => (
         <div
-          key={video.id}
+          key={video.name}
           className="rounded-lg border bg-card text-card-foreground shadow-sm"
         >
-          <MediaPlayer title={video.title}>
-            <MediaProvider>
-              <source src={video.public_url} type="video/mp4" />
-            </MediaProvider>
-          </MediaPlayer>
+          <div className="relative aspect-video">
+            <Link href={`/video/${encodeURIComponent(video.name)}`}>
+              <video
+                src={video.publicUrl}
+                className="h-full w-full rounded-t-lg object-cover"
+                preload="metadata"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                <span className="text-lg font-semibold text-white">Play</span>
+              </div>
+            </Link>
+          </div>
           <div className="p-4">
-            <h3 className="text-lg font-semibold">{video.title}</h3>
-            <p className="text-sm text-gray-500">{video.description}</p>
+            <h3 className="text-lg font-semibold">{video.name}</h3>
           </div>
         </div>
       ))}
