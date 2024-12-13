@@ -198,7 +198,7 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <section className="py-32">
+    <section className="py-4">
       <div className="container">
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
