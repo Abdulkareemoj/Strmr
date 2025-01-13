@@ -14,7 +14,7 @@ export default async function handler(
       // Fetch a specific video
       try {
         const { data, error } = await supabase.storage
-          .from("strmrvids")
+          .from(process.env.FOLDER_NAME)
           .createSignedUrl(`videos/${id}`, 3600); // 1 hour expiration
 
         if (error) throw error;
@@ -32,7 +32,7 @@ export default async function handler(
       // Fetch all videos (existing functionality)
       try {
         const { data, error } = await supabase.storage
-          .from("strmrvids")
+          .from(process.env.FOLDER_NAME)
           .list("videos", {
             sortBy: { column: "name", order: "asc" },
           });

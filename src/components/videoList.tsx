@@ -1,73 +1,92 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+"use client";
 
 import * as React from "react";
 import Link from "next/link";
+import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
+import { createClient } from "~/utils/supabase/component";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { AlertCircle, Play } from "lucide-react";
 
 interface Video {
   name: string;
-  publicUrl: string;
+  url: string;
 }
 
+const supabase = createClient();
+
 export default function VideoList() {
-  const [videos, setVideos] = React.useState<Video[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const {
+    data: videos,
+    error,
+    isValidating,
+  } = useQuery(
+    supabase
+      .from("videos")
+      .select("name, url")
+      .order("name", { ascending: true }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
 
-  React.useEffect(() => {
-    fetchVideos();
-  }, []);
-
-  async function fetchVideos() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch("/api/videos");
-      if (!response.ok) {
-        throw new Error("Failed to fetch videos");
-      }
-
-      const data = await response.json();
-      setVideos(data);
-    } catch (error) {
-      console.error("Error fetching videos:", error);
-      setError("Failed to load videos. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (loading) {
-    return <div>Loading videos...</div>;
+  if (isValidating) {
+    return <VideoListSkeleton />;
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          Failed to load videos. Please try again.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {videos.map((video) => (
-        <div
-          key={video.name}
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
-        >
-          <div className="relative aspect-video">
-            <Link href={`/video/${encodeURIComponent(video.name)}`}>
-              <video
-                src={video.publicUrl}
-                className="h-full w-full rounded-t-lg object-cover"
-                preload="metadata"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 hover:opacity-100">
-                <span className="text-lg font-semibold text-white">Play</span>
-              </div>
-            </Link>
+      {videos?.map((video) => <VideoCard key={video.name} video={video} />)}
+    </div>
+  );
+}
+
+function VideoCard({ video }: { video: Video }) {
+  return (
+    <div className="overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
+      <div className="relative aspect-video">
+        <Link href={`/video/${encodeURIComponent(video.name)}`}>
+          <video
+            src={video.url}
+            className="h-full w-full object-cover"
+            preload="metadata"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity duration-300 hover:opacity-100">
+            <Play className="h-12 w-12 text-white" />
           </div>
+        </Link>
+      </div>
+      <div className="p-4">
+        <h3 className="line-clamp-1 text-lg font-semibold">{video.name}</h3>
+      </div>
+    </div>
+  );
+}
+
+function VideoListSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="overflow-hidden rounded-lg border bg-card shadow-sm"
+        >
+          <Skeleton className="aspect-video w-full" />
           <div className="p-4">
-            <h3 className="text-lg font-semibold">{video.name}</h3>
+            <Skeleton className="h-6 w-3/4" />
           </div>
         </div>
       ))}
