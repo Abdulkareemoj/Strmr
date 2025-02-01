@@ -5,7 +5,8 @@ import Header from "~/components/Header";
 import { cn } from "~/lib/utils";
 import { ThemeProvider } from "~/components/Provider";
 import Head from "next/head";
-
+import { Toaster } from "~/components/ui/toaster"
+ 
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
@@ -60,20 +61,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <div className={cn("bg-background min-h-screen font-sans antialiased")}>
-          <Header />
+      </Head>{" "}
+      <div className={cn("min-h-screen bg-background font-sans antialiased")}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="relative flex min-h-screen flex-col">
+            <Header />
 
-          <main className="mx-auto">{children}</main>
-          {/* <Footer /> */}
-        </div>
-      </ThemeProvider>
+            <main className="flex-1 pt-16 sm:pt-20">{children}</main>
+                 <Toaster />{/* <Footer /> */}
+          </div>
+        </ThemeProvider>{" "}
+      </div>
     </>
   );
 }

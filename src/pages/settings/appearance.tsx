@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { toast } from "~/components/ui/use-toast";
+import { toast } from "~/hooks/use-toast";
 
 import { Separator } from "~/components/ui/separator";
 import SettingsLayout from "~/components/SettingsLayout";

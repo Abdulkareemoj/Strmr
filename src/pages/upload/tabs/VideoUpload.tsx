@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createClient } from "~/utils/supabase/component";
-import { toast } from "sonner";
+import { useToast } from "~/hooks/use-toast"
 import {
   FileTextIcon,
   TrashIcon,
@@ -31,7 +31,7 @@ export default function VideoUpload() {
   );
   const [uploadedFiles, setUploadedFiles] = React.useState<UploadedFile[]>([]);
   const [errors, setErrors] = React.useState<string[]>([]);
-
+  const { toast } = useToast()
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
     if (!selectedFiles) return;
@@ -90,20 +90,18 @@ export default function VideoUpload() {
           },
         ]);
 
-        toast.success(`Video ${file.name} uploaded successfully`);
+     toast({ title: "Success", description: `Video ${file.name} uploaded successfully` })
       } catch (error) {
-        console.error("Error uploading video:", error);
+        console.error("Error uploading Video:", error)
         setErrors((prev) => [
           ...prev,
-          `Failed to upload ${file.name}: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
-        ]);
+          `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+        ])
         setProgresses((prev) => {
-          const newProgresses = { ...prev };
-          delete newProgresses[file.name];
-          return newProgresses;
-        });
+          const newProgresses = { ...prev }
+          delete newProgresses[file.name]
+          return newProgresses
+        })
       }
     }
 
@@ -122,7 +120,7 @@ export default function VideoUpload() {
       if (error) throw error;
 
       setUploadedFiles((prev) => prev.filter((f) => f.key !== file.key));
-      toast.success(`Video ${file.name} deleted successfully`);
+ toast({ title: "Success", description: `Video ${file.name} deleted successfully` })
     } catch (error) {
       console.error("Error deleting video:", error);
       setErrors((prev) => [

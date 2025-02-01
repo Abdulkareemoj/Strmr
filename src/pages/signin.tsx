@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Icons } from "~/components/ui/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";

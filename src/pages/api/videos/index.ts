@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { env } from "~/env";
 import { createClient } from "~/utils/supabase/component";
 
 const supabase = createClient();
@@ -14,7 +15,7 @@ export default async function handler(
       // Fetch a specific video
       try {
         const { data, error } = await supabase.storage
-          .from(process.env.FOLDER_NAME)
+          .from(env.FOLDER_NAME)
           .createSignedUrl(`videos/${id}`, 3600); // 1 hour expiration
 
         if (error) throw error;
@@ -32,7 +33,7 @@ export default async function handler(
       // Fetch all videos (existing functionality)
       try {
         const { data, error } = await supabase.storage
-          .from(process.env.FOLDER_NAME)
+          .from(env.FOLDER_NAME)
           .list("videos", {
             sortBy: { column: "name", order: "asc" },
           });

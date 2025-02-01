@@ -25,7 +25,7 @@ SUPABASE_URL: z.string().url(),
 SUPABASE_ANON_KEY: z.string(),
 SUPABASE_SERVICE_ROLE_KEY: z.string(),
 SUPABASE_JWT_SECRET: z.string(),
-
+FOLDER_NAME:z.string(),
   },
 
   /**
@@ -65,7 +65,7 @@ SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET,
     NEXT_PUBLIC_SUPABASE_ANON_KEY:process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 NEXT_PUBLIC_SUPABASE_URL:process.env.NEXT_PUBLIC_SUPABASE_URL,
 NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    
+    FOLDER_NAME:process.env.FOLDER_NAME,	
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

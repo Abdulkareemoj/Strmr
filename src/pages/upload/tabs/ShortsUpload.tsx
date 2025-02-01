@@ -1,85 +1,73 @@
-import * as React from "react";
-import { createClient } from "~/utils/supabase/component";
-import { toast } from "sonner";
-import {
-  FileTextIcon,
-  TrashIcon,
-  UploadIcon,
-  Cross1Icon,
-} from "@radix-ui/react-icons";
+import * as React from "react"
+import { createClient } from "~/utils/supabase/component"
+import { useToast } from "~/hooks/use-toast"
+import { FileTextIcon, TrashIcon, UploadIcon, Cross1Icon } from "@radix-ui/react-icons"
 
-import { Button } from "~/components/ui/button";
-import { Progress } from "~/components/ui/progress";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { Input } from "~/components/ui/input";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button"
+import { Progress } from "~/components/ui/progress"
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area"
+import { Input } from "~/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
 
-const supabase = createClient();
+const supabase = createClient()
 
 interface UploadedFile {
-  key: string;
-  url: string;
-  name: string;
+  key: string
+  url: string
+  name: string
 }
 
 export default function ShortsUpload() {
-  const [files, setFiles] = React.useState<File[]>([]);
-  const [previews, setPreviews] = React.useState<string[]>([]);
-  const [uploading, setUploading] = React.useState(false);
-  const [progresses, setProgresses] = React.useState<Record<string, number>>(
-    {},
-  );
-  const [uploadedFiles, setUploadedFiles] = React.useState<UploadedFile[]>([]);
-  const [errors, setErrors] = React.useState<string[]>([]);
+  const [files, setFiles] = React.useState<File[]>([])
+  const [previews, setPreviews] = React.useState<string[]>([])
+  const [uploading, setUploading] = React.useState(false)
+  const [progresses, setProgresses] = React.useState<Record<string, number>>({})
+  const [uploadedFiles, setUploadedFiles] = React.useState<UploadedFile[]>([])
+  const [errors, setErrors] = React.useState<string[]>([])
+  const { toast } = useToast()
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (!selectedFiles) return;
+    const selectedFiles = event.target.files
+    if (!selectedFiles) return
 
-    const newFiles = Array.from(selectedFiles);
-    setFiles(newFiles);
+    const newFiles = Array.from(selectedFiles)
+    setFiles(newFiles)
 
     // Create previews
-    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-    setPreviews(newPreviews);
-  };
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file))
+    setPreviews(newPreviews)
+  }
 
   const onUpload = async () => {
-    setUploading(true);
-    setErrors([]);
+    setUploading(true)
+    setErrors([])
 
     for (const file of files) {
       try {
-        setProgresses((prev) => ({ ...prev, [file.name]: 0 }));
+        setProgresses((prev) => ({ ...prev, [file.name]: 0 }))
 
         // Check if file already exists
         const { data: existingFiles, error: listError } = await supabase.storage
           .from("strmrvids")
-          .list("shorts", { search: file.name });
+          .list("shorts", { search: file.name })
 
-        if (listError) throw listError;
+        if (listError) throw listError
 
         if (existingFiles && existingFiles.length > 0) {
-          throw new Error(
-            `A file named ${file.name} already exists. Please rename your file and try again.`,
-          );
+          throw new Error(`A file named ${file.name} already exists. Please rename your file and try again.`)
         }
 
-        const { data, error } = await supabase.storage
-          .from("strmrvids")
-          .upload(`shorts/${file.name}`, file, {
-            cacheControl: "3600",
-          });
+        const { data, error } = await supabase.storage.from("strmrvids").upload(`shorts/${file.name}`, file, {
+          cacheControl: "3600",
+        })
 
-        if (error) throw error;
+        if (error) throw error
 
-        setProgresses((prev) => ({ ...prev, [file.name]: 100 }));
+        setProgresses((prev) => ({ ...prev, [file.name]: 100 }))
 
         const {
           data: { publicUrl },
-        } = supabase.storage
-          .from("strmrvids")
-          .getPublicUrl(`shorts/${file.name}`);
+        } = supabase.storage.from("strmrvids").getPublicUrl(`shorts/${file.name}`)
 
         setUploadedFiles((prev) => [
           ...prev,
@@ -88,51 +76,45 @@ export default function ShortsUpload() {
             url: publicUrl,
             name: file.name,
           },
-        ]);
+        ])
 
-        toast.success(`Short ${file.name} uploaded successfully`);
+        toast({ title: "Success", description: `Short ${file.name} uploaded successfully` })
       } catch (error) {
-        console.error("Error uploading short:", error);
+        console.error("Error uploading short:", error)
         setErrors((prev) => [
           ...prev,
-          `Failed to upload ${file.name}: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
-        ]);
+          `Failed to upload ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+        ])
         setProgresses((prev) => {
-          const newProgresses = { ...prev };
-          delete newProgresses[file.name];
-          return newProgresses;
-        });
+          const newProgresses = { ...prev }
+          delete newProgresses[file.name]
+          return newProgresses
+        })
       }
     }
 
-    setUploading(false);
-    setFiles([]);
-    setPreviews([]);
-    setProgresses({});
-  };
+    setUploading(false)
+    setFiles([])
+    setPreviews([])
+    setProgresses({})
+  }
 
   const onDelete = async (file: UploadedFile) => {
     try {
-      const { error } = await supabase.storage
-        .from("strmrvids")
-        .remove([file.key]);
+      const { error } = await supabase.storage.from("strmrvids").remove([file.key])
 
-      if (error) throw error;
+      if (error) throw error
 
-      setUploadedFiles((prev) => prev.filter((f) => f.key !== file.key));
-      toast.success(`Short ${file.name} deleted successfully`);
+      setUploadedFiles((prev) => prev.filter((f) => f.key !== file.key))
+      toast({ title: "Success", description: `Short ${file.name} deleted successfully` })
     } catch (error) {
-      console.error("Error deleting short:", error);
+      console.error("Error deleting short:", error)
       setErrors((prev) => [
         ...prev,
-        `Failed to delete ${file.name}: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-      ]);
+        `Failed to delete ${file.name}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      ])
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -144,12 +126,9 @@ export default function ShortsUpload() {
           <div className="flex flex-col items-center justify-center pb-6 pt-5">
             <UploadIcon className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400" />
             <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-              <span className="font-semibold">Click to upload</span> or drag and
-              drop
+              <span className="font-semibold">Click to upload</span> or drag and drop
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              MP4, AVI, MOV (MAX. 50MB)
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">MP4, AVI, MOV (MAX. 50MB)</p>
           </div>
           <Input
             id="shorts-upload"
@@ -175,8 +154,8 @@ export default function ShortsUpload() {
                   size="icon"
                   className="absolute right-2 top-2"
                   onClick={() => {
-                    setFiles(files.filter((_, i) => i !== index));
-                    setPreviews(previews.filter((_, i) => i !== index));
+                    setFiles(files.filter((_, i) => i !== index))
+                    setPreviews(previews.filter((_, i) => i !== index))
                   }}
                 >
                   <Cross1Icon className="h-4 w-4" />
@@ -210,37 +189,30 @@ export default function ShortsUpload() {
 
       <UploadedFilesCard uploadedFiles={uploadedFiles} onDelete={onDelete} />
     </div>
-  );
+  )
 }
 
 function UploadedFilesCard({
   uploadedFiles,
   onDelete,
 }: {
-  uploadedFiles: UploadedFile[];
-  onDelete: (file: UploadedFile) => void;
+  uploadedFiles: UploadedFile[]
+  onDelete: (file: UploadedFile) => void
 }) {
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null)
 
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="flex flex-col space-y-1.5 p-6">
-        <h3 className="text-2xl font-semibold leading-none tracking-tight">
-          Uploaded Shorts
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          View and manage your uploaded shorts here
-        </p>
+        <h3 className="text-2xl font-semibold leading-none tracking-tight">Uploaded Shorts</h3>
+        <p className="text-sm text-muted-foreground">View and manage your uploaded shorts here</p>
       </div>
       <div className="p-6">
         {uploadedFiles.length > 0 ? (
           <ScrollArea className="h-[300px]">
             <div className="space-y-4">
               {uploadedFiles.map((file) => (
-                <div
-                  key={file.key}
-                  className="flex items-center justify-between"
-                >
+                <div key={file.key} className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <FileTextIcon className="h-8 w-8" />
                     <div>
@@ -249,18 +221,10 @@ function UploadedFilesCard({
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPreviewUrl(file.url)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setPreviewUrl(file.url)}>
                       Preview
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => onDelete(file)}
-                    >
+                    <Button variant="destructive" size="sm" onClick={() => onDelete(file)}>
                       <TrashIcon className="h-4 w-4" />
                     </Button>
                   </div>
@@ -271,12 +235,8 @@ function UploadedFilesCard({
           </ScrollArea>
         ) : (
           <div className="py-10 text-center">
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">
-              No shorts
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Get started by uploading a short.
-            </p>
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">No shorts</h3>
+            <p className="mt-1 text-sm text-gray-500">Get started by uploading a short.</p>
           </div>
         )}
       </div>
@@ -284,17 +244,13 @@ function UploadedFilesCard({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="relative w-full max-w-3xl">
             <video src={previewUrl} controls className="w-full" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute right-2 top-2"
-              onClick={() => setPreviewUrl(null)}
-            >
+            <Button variant="outline" size="sm" className="absolute right-2 top-2" onClick={() => setPreviewUrl(null)}>
               Close
             </Button>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
+
