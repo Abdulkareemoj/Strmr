@@ -1,4 +1,4 @@
-import { Button } from "./ui/button";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,7 +6,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "~/components/ui/dropdown-menu";
 import { createClient } from "~/utils/supabase/component";
 import { AvatarIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/router";
@@ -60,7 +60,7 @@ export default function LoginBtn() {
 
   return (
     <>
-      Not signed in <br />
+     
       <Button onClick={() => router.push("/signin")}>Sign in</Button>
     </>
   );

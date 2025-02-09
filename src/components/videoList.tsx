@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 import { useQuery } from "@supabase-cache-helpers/postgrest-swr";

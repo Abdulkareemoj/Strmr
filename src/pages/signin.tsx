@@ -41,26 +41,18 @@ export default function UserAuthForm({
       ...prev,
       ...obj,
     }));
-    // After 5 seconds, set all loading states back to false
-    setTimeout(() => {
-      setLoading({
-        isLoadingGoogle: false,
-        isLoadingDiscord: false,
-        isLoadingEmail: false,
-      });
-    }, 3000);
   }
 
-  function isAnyLoading(): boolean {
-    return (
-      loadingStates.isLoadingDiscord ||
-      loadingStates.isLoadingGoogle ||
-      loadingStates.isLoadingEmail ||
-      false
-    );
-  }
+function isAnyLoading(): boolean {
+  return (
+    Boolean(loadingStates.isLoadingDiscord) ||
+    Boolean(loadingStates.isLoadingGoogle) ||
+    Boolean(loadingStates.isLoadingEmail)
+  );
+}
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const target = event.target as typeof event.target & {
       email: { value: string };
@@ -69,34 +61,47 @@ export default function UserAuthForm({
     const email = target.email.value;
     const password = target.password.value;
 
+    setLoadingState({ isLoadingEmail: true });
+
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
 
     if (error) {
+      console.log("Login failed", error.message);
+    } else {
       console.log("Login successful");
       void router.push("/trending");
-    } else {
-      console.log("Login failed");
     }
+
+    setLoadingState({ isLoadingEmail: false });
   }
 
-  // Social login functions
   async function signInWithGoogle() {
+    setLoadingState({ isLoadingGoogle: true });
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
     });
-    void router.push("/trending");
-    if (error) console.error("Google login failed", error.message);
+    if (error) {
+      console.error("Google login failed", error.message);
+    } else {
+      void router.push("/trending");
+    }
+    setLoadingState({ isLoadingGoogle: false });
   }
 
   async function signInWithDiscord() {
+    setLoadingState({ isLoadingDiscord: true });
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "discord",
     });
-    void router.push("/trending");
-    if (error) console.error("Discord login failed", error.message);
+    if (error) {
+      console.error("Discord login failed", error.message);
+    } else {
+      void router.push("/trending");
+    }
+    setLoadingState({ isLoadingDiscord: false });
   }
 
   return (
@@ -109,7 +114,7 @@ export default function UserAuthForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -133,14 +138,14 @@ export default function UserAuthForm({
             </div>
             <Button
               type="submit"
-              onClick={() => {
-                setLoadingState({ isLoadingEmail: true });
-                // onSubmit;
-              }}
               disabled={isAnyLoading()}
               className="w-full"
             >
-              Login
+              {loadingStates.isLoadingEmail ? (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Login"
+              )}
             </Button>
 
             <div className="flex justify-center">Or</div>
@@ -148,10 +153,7 @@ export default function UserAuthForm({
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => {
-                  setLoadingState({ isLoadingGoogle: true });
-                  // signInWithGoogle;
-                }}
+                onClick={signInWithGoogle}
                 disabled={isAnyLoading()}
               >
                 {loadingStates.isLoadingGoogle ? (
@@ -165,10 +167,7 @@ export default function UserAuthForm({
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => {
-                  setLoadingState({ isLoadingDiscord: true });
-                  // signInWithDiscord;
-                }}
+                onClick={signInWithDiscord}
                 disabled={isAnyLoading()}
               >
                 {loadingStates.isLoadingDiscord ? (
@@ -179,7 +178,7 @@ export default function UserAuthForm({
                 Discord
               </Button>
             </div>
-          </div>
+          </form>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="underline">

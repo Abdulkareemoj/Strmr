@@ -30,7 +30,7 @@ export default function Header() {
   return (
     <header className="fixed left-0 right-0 top-0 z-50 transition-all duration-300 ease-in-out">
       <div
-        className={`container ${scrolled ? "bg-background/80 shadow-md backdrop-blur-md" : ""} py-4`}
+        className={` ${scrolled ? "bg-background/80 shadow-md backdrop-blur-md" : ""} py-4 px-2`}
       >
         <nav className="hidden justify-between lg:flex">
           <div className="flex items-center gap-6">
