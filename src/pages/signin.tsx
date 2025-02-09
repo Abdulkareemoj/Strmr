@@ -52,57 +52,62 @@ function isAnyLoading(): boolean {
 }
 
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const target = event.target as typeof event.target & {
-      email: { value: string };
-      password: { value: string };
-    };
-    const email = target.email.value;
-    const password = target.password.value;
+ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const target = event.target as typeof event.target & {
+    email: { value: string };
+    password: { value: string };
+  };
+  const email = target.email.value;
+  const password = target.password.value;
 
-    setLoadingState({ isLoadingEmail: true });
+  setLoadingState({ isLoadingEmail: true });
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
 
-    if (error) {
-      console.log("Login failed", error.message);
-    } else {
-      console.log("Login successful");
-      void router.push("/trending");
-    }
-
-    setLoadingState({ isLoadingEmail: false });
+  if (error) {
+    console.error("Login failed:", error.message);
+    // Redirect to the error page with the error message
+    void router.push(`/error?message=${encodeURIComponent(error.message)}`);
+  } else {
+    console.log("Login successful");
+    void router.push("/trending");
   }
 
-  async function signInWithGoogle() {
-    setLoadingState({ isLoadingGoogle: true });
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
-    if (error) {
-      console.error("Google login failed", error.message);
-    } else {
-      void router.push("/trending");
-    }
-    setLoadingState({ isLoadingGoogle: false });
-  }
+  setLoadingState({ isLoadingEmail: false });
+}
 
-  async function signInWithDiscord() {
-    setLoadingState({ isLoadingDiscord: true });
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "discord",
-    });
-    if (error) {
-      console.error("Discord login failed", error.message);
-    } else {
-      void router.push("/trending");
-    }
-    setLoadingState({ isLoadingDiscord: false });
+async function signInWithGoogle() {
+  setLoadingState({ isLoadingGoogle: true });
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+  });
+  if (error) {
+    console.error("Google login failed:", error.message);
+    void router.push(`/error?message=${encodeURIComponent(error.message)}`);
+  } else {
+    void router.push("/trending");
   }
+  setLoadingState({ isLoadingGoogle: false });
+}
+
+async function signInWithDiscord() {
+  setLoadingState({ isLoadingDiscord: true });
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "discord",
+  });
+  if (error) {
+    console.error("Discord login failed:", error.message);
+    void router.push(`/error?message=${encodeURIComponent(error.message)}`);
+  } else {
+    void router.push("/trending");
+  }
+  setLoadingState({ isLoadingDiscord: false });
+}
+
 
   return (
     <main className="flex h-screen items-center justify-center overflow-hidden">
