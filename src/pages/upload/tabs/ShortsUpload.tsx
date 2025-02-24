@@ -298,17 +298,19 @@ export default function ShortsUpload() {
     setPreview(URL.createObjectURL(file))
   }
 
-  const onSubmit = async (values: ShortFormValues) => {
-    setUploading(true)
-    setProgress(0)
+const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
 
-    try {
-      // Convert file to base64
-      const reader = new FileReader()
-      reader.readAsDataURL(values.file)
-      
-      reader.onload = async () => {
-        const base64File = reader.result
+const onSubmit = async (values: ShortFormValues) => {
+  setUploading(true)
+  setProgress(0)
+
+  try {
+    const file = values.file;
+    const reader = new FileReader()
+    
+    reader.onload = async () => {
+      try {
+        const base64File = reader.result as string;
 
         const response = await fetch("/api/shorts/upload", {
           method: "POST",
@@ -324,7 +326,8 @@ export default function ShortsUpload() {
         })
 
         if (!response.ok) {
-          throw new Error("Upload failed")
+          const errorData = await response.json().catch(() => ({ error: "Upload failed" }));
+          throw new Error(errorData.error || "Upload failed")
         }
 
         const data = await response.json()
@@ -337,22 +340,31 @@ export default function ShortsUpload() {
         // Reset form and preview
         form.reset()
         setPreview(null)
+      } catch (error) {
+        console.error("Upload error:", error)
+        throw error
       }
-
-      reader.onerror = () => {
-        throw new Error("Failed to read file")
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload short",
-        variant: "destructive",
-      })
-    } finally {
-      setUploading(false)
-      setProgress(0)
     }
+
+    reader.onerror = () => {
+      throw new Error("Failed to read file")
+    }
+
+    // Start reading the file
+    reader.readAsDataURL(file)
+
+  } catch (error) {
+    console.error("Form error:", error)
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to upload video",
+      variant: "destructive",
+    })
+  } finally {
+    setUploading(false)
+    setProgress(0)
   }
+}
 
   return (
     <div className="space-y-6">

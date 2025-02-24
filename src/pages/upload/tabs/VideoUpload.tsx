@@ -298,9 +298,8 @@
 // }
 
 import * as React from "react"
-import { createClient } from "~/utils/supabase/component"
 import { useToast } from "~/hooks/use-toast"
-import { FileTextIcon, UploadIcon, Cross1Icon } from "@radix-ui/react-icons"
+import {  UploadIcon, Cross1Icon } from "@radix-ui/react-icons"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type VideoFormValues, videoSchema } from "~/lib/schemas"
@@ -309,7 +308,6 @@ import { Button } from "~/components/ui/button"
 import { Progress } from "~/components/ui/progress"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
 import {
   Form,
   FormControl,
@@ -344,17 +342,19 @@ export default function VideoUpload() {
     setPreview(URL.createObjectURL(file))
   }
 
-  const onSubmit = async (values: VideoFormValues) => {
-    setUploading(true)
-    setProgress(0)
+ const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
 
-    try {
-      // Convert file to base64
-      const reader = new FileReader()
-      reader.readAsDataURL(values.file)
-      
-      reader.onload = async () => {
-        const base64File = reader.result
+const onSubmit = async (values: VideoFormValues) => {
+  setUploading(true)
+  setProgress(0)
+
+  try {
+    const file = values.file;
+    const reader = new FileReader()
+    
+    reader.onload = async () => {
+      try {
+        const base64File = reader.result as string;
 
         const response = await fetch("/api/videos/upload", {
           method: "POST",
@@ -370,7 +370,8 @@ export default function VideoUpload() {
         })
 
         if (!response.ok) {
-          throw new Error("Upload failed")
+          const errorData = await response.json().catch(() => ({ error: "Upload failed" }));
+          throw new Error(errorData.error || "Upload failed")
         }
 
         const data = await response.json()
@@ -383,19 +384,31 @@ export default function VideoUpload() {
         // Reset form and preview
         form.reset()
         setPreview(null)
+      } catch (error) {
+        console.error("Upload error:", error)
+        throw error
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload video",
-        variant: "destructive",
-      })
-    } finally {
-      setUploading(false)
-      setProgress(0)
     }
-  }
 
+    reader.onerror = () => {
+      throw new Error("Failed to read file")
+    }
+
+    // Start reading the file
+    reader.readAsDataURL(file)
+
+  } catch (error) {
+    console.error("Form error:", error)
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to upload video",
+      variant: "destructive",
+    })
+  } finally {
+    setUploading(false)
+    setProgress(0)
+  }
+}
   return (
     <div className="space-y-6">
       <Form {...form}>

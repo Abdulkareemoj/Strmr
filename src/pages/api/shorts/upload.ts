@@ -54,7 +54,6 @@
 //     res.status(500).json({ error: "Failed to upload video" });
 //   }
 // }
-
 import type { NextApiRequest, NextApiResponse } from "next"
 import { createClient } from "~/utils/supabase/component"
 import { db } from "~/server/db"
@@ -64,6 +63,7 @@ export const config = {
     bodyParser: {
       sizeLimit: '50mb',
     },
+    responseLimit: false,
   },
 }
 
@@ -71,63 +71,75 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Set proper headers
+  res.setHeader('Content-Type', 'application/json');
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" })
   }
 
-  // Create Supabase server client
-  const supabase = createClient()
-
-  // Get the user session
+  try {
+    const supabase = createClient()
+ // Get the user session
   const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     return res.status(401).json({ error: "Unauthorized" })
   }
-
-  try {
     const { file, title, description, public: isPublic } = req.body
 
     if (!file || !title || !description) {
       return res.status(400).json({ error: "Missing required fields" })
     }
 
-    // Convert base64 to buffer
-    const fileData = Buffer.from(file.split(',')[1], 'base64')
-    const fileName = `${Date.now()}_${title.replace(/\s+/g, '_')}.mp4`
+    try {
+      // Convert base64 to buffer
+      const fileData = Buffer.from(file.split(',')[1], 'base64')
+      const fileName = `${Date.now()}_${title.replace(/\s+/g, '_')}.mp4`
 
-    // Upload to Supabase
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("strmrvids")
-      .upload(`shorts/${fileName}`, fileData, {
-        contentType: 'video/mp4',
-        cacheControl: "3600",
+      // Upload to Supabase
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("strmrvids")
+        .upload(`shorts/${fileName}`, fileData, {
+          contentType: 'video/mp4',
+          cacheControl: "3600",
+        })
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError)
+        return res.status(500).json({ error: uploadError.message })
+      }
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("strmrvids")
+        .getPublicUrl(`shorts/${fileName}`)
+
+      // Create short record in database
+      const short = await db.short.create({
+        data: {
+          title,
+          description,
+          shortId: fileName,
+          public: isPublic,
+          url: publicUrl,
+          thumbnailUrl: "",
+          duration: 0,
+          userId: "temp-user" // session.user.id,
+        },
       })
 
-    if (uploadError) throw uploadError
-
-    // Get the public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from("strmrvids")
-      .getPublicUrl(`shorts/${fileName}`)
-
-    // Create short record in database
-    const short = await db.short.create({
-      data: {
-        title,
-        description,
-        shortId: fileName,
-        public: isPublic,
-        url: publicUrl,
-        thumbnailUrl: "", // TODO: Generate thumbnail
-        duration: 0, // TODO: Get video duration
-        userId: session.user.id,
-      },
-    })
-
-    res.status(200).json({ short })
+      return res.status(200).json({ short })
+    } catch (uploadError) {
+      console.error("Upload error:", uploadError)
+      return res.status(500).json({ 
+        error: uploadError instanceof Error ? uploadError.message : "Failed to upload short" 
+      })
+    }
   } catch (error) {
-    console.error("Error uploading short:", error)
-    res.status(500).json({ error: "Failed to upload short" })
+    console.error("Server error:", error)
+    return res.status(500).json({ 
+      error: error instanceof Error ? error.message : "Internal server error" 
+    })
   }
 }
