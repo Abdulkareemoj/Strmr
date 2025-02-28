@@ -4,7 +4,7 @@ import { useQuery } from "@supabase-cache-helpers/postgrest-swr"
 import { createClient } from "~/utils/supabase/component"
 import { Skeleton } from "~/components/ui/skeleton"
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
-import { AlertCircle, Play } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 
 interface Short {
   id: number
