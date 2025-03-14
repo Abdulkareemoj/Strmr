@@ -1,24 +1,18 @@
-  /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react"
 import { useToast } from "~/hooks/use-toast"
-import {  UploadIcon, Cross1Icon } from "@radix-ui/react-icons"
+import { UploadIcon, Cross1Icon } from "@radix-ui/react-icons"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type VideoFormValues, videoSchema } from "~/lib/schemas"
+import axios from "axios"
 
 import { Button } from "~/components/ui/button"
 import { Progress } from "~/components/ui/progress"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form"
 import { Switch } from "~/components/ui/switch"
 
 export default function VideoUpload() {
@@ -33,6 +27,7 @@ export default function VideoUpload() {
       public: true,
       title: "",
       description: "",
+      file: null as any, // Cast to any to satisfy TypeScript
     },
   })
 
@@ -44,73 +39,96 @@ export default function VideoUpload() {
     setPreview(URL.createObjectURL(file))
   }
 
- const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+  const MAX_CHUNK_SIZE = 5 * 1024 * 1024 // 5MB chunks
 
-const onSubmit = async (values: VideoFormValues) => {
-  setUploading(true)
-  setProgress(0)
-
-  try {
-    const file = values.file;
-    const reader = new FileReader()
-    
-    reader.onload = async () => {
-      try {
-        const base64File = reader.result as string;
-
-        const response = await fetch("/api/videos/upload", {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            file: base64File,
-            title: values.title,
-            description: values.description,
-            public: values.public,
-          }),
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: "Upload failed" }));
-          throw new Error(errorData.error || "Upload failed")
-        }
-
-        const data = await response.json()
-        
-        toast({
-          title: "Success",
-          description: "Video uploaded successfully",
-        })
-
-        // Reset form and preview
-        form.reset()
-        setPreview(null)
-      } catch (error) {
-        console.error("Upload error:", error)
-        throw error
-      }
-    }
-
-    reader.onerror = () => {
-      throw new Error("Failed to read file")
-    }
-
-    // Start reading the file
-    reader.readAsDataURL(file)
-
-  } catch (error) {
-    console.error("Form error:", error)
-    toast({
-      title: "Error",
-      description: error instanceof Error ? error.message : "Failed to upload video",
-      variant: "destructive",
-    })
-  } finally {
-    setUploading(false)
+  const onSubmit = async (values: VideoFormValues) => {
+    setUploading(true)
     setProgress(0)
+
+    try {
+      const file = values.file
+      if (!file) {
+        throw new Error("No file selected")
+      }
+
+      // Check file size
+      if (file.size > 100 * 1024 * 1024) {
+        // 100MB limit
+        throw new Error("File size exceeds 100MB limit")
+      }
+
+      // Use a promise-based approach for FileReader
+      const readFileAsDataURL = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = () => reject(new Error("Failed to read file"))
+          reader.readAsDataURL(file)
+        })
+      }
+
+      // Update progress to show we're processing
+      setProgress(10)
+
+      // Read the file
+      const base64File = await readFileAsDataURL(file)
+
+      // Update progress to show we're starting upload
+      setProgress(20)
+
+      // Send the file to the server using axios
+      const { data } = await axios.post(
+        "/api/videos",
+        {
+          file: base64File,
+          title: values.title,
+          description: values.description,
+          public: values.public,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          onUploadProgress: (progressEvent) => {
+            const progress = progressEvent.total
+              ? Math.round((progressEvent.loaded * 70) / progressEvent.total) + 20
+              : 50
+            setProgress(Math.min(progress, 90)) // Cap at 90% until we get the response
+          },
+        },
+      )
+
+      setProgress(100)
+
+      toast({
+        title: "Success",
+        description: "Video uploaded successfully",
+      })
+
+      // Reset form and preview
+      form.reset()
+      setPreview(null)
+    } catch (error) {
+      console.error("Upload error:", error)
+      let errorMessage = "Failed to upload video"
+
+      if (axios.isAxiosError(error)) {
+        // Extract error message from axios error response
+        errorMessage = error.response?.data?.error || error.message
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
+    } finally {
+      setUploading(false)
+    }
   }
-}
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -126,16 +144,31 @@ const onSubmit = async (values: VideoFormValues) => {
                   <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
                     <span className="font-semibold">Click to upload</span> or drag and drop
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    MP4, AVI, MOV (MAX. 100MB)
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">MP4, AVI, MOV (MAX. 100MB)</p>
                 </div>
                 <Input
                   id="video-upload"
                   type="file"
                   accept="video/*"
                   className="hidden"
-                  onChange={handleFileSelect}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+
+                    // Check file size before setting
+                    if (file.size > 100 * 1024 * 1024) {
+                      // 100MB
+                      toast({
+                        title: "Error",
+                        description: "File size exceeds 100MB limit",
+                        variant: "destructive",
+                      })
+                      return
+                    }
+
+                    form.setValue("file", file)
+                    setPreview(URL.createObjectURL(file))
+                  }}
                   disabled={uploading}
                 />
               </label>
@@ -152,7 +185,7 @@ const onSubmit = async (values: VideoFormValues) => {
                   size="icon"
                   className="absolute right-2 top-2"
                   onClick={() => {
-                    form.setValue("file", null)
+                    form.setValue("file", null as any)
                     setPreview(null)
                   }}
                 >
@@ -181,11 +214,7 @@ const onSubmit = async (values: VideoFormValues) => {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Video description"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
+                      <Textarea placeholder="Video description" className="min-h-[100px]" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -199,23 +228,16 @@ const onSubmit = async (values: VideoFormValues) => {
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-base">Public</FormLabel>
-                      <FormDescription>
-                        Make this video publicly accessible
-                      </FormDescription>
+                      <FormDescription>Make this video publicly accessible</FormDescription>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
-              {uploading && (
-                <Progress value={progress} className="w-full" />
-              )}
+              {uploading && <Progress value={progress} className="w-full" />}
 
               <Button type="submit" disabled={uploading} className="w-full">
                 {uploading ? "Uploading..." : "Upload Video"}
@@ -227,3 +249,4 @@ const onSubmit = async (values: VideoFormValues) => {
     </div>
   )
 }
+
