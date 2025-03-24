@@ -4,6 +4,8 @@ import { createClient } from "~/utils/supabase/component"
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { code, next = "/dashboard" } = req.query
 
+  console.log("Incoming request query:", req.query); // Log the incoming request
+
   if (typeof code !== "string") {
     console.error("Invalid code:", code)
     return res.redirect(`/signin?error=${encodeURIComponent("Invalid code")}`)

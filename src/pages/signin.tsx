@@ -1,5 +1,3 @@
-
-
 import { useState } from "react"
 import { useRouter } from "next/router"
 import Link from "next/link"
@@ -17,8 +15,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Alert, AlertDescription } from "~/components/ui/alert"
 import { Icons } from "~/components/ui/icons"
 import { SignInFormValues, signInSchema } from "~/lib/schemas"
-
-
 
 type LoadingStates = {
   isLoadingEmail?: boolean
@@ -278,4 +274,3 @@ export default function SignIn() {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   return requireNoAuth(context)
 }
-
