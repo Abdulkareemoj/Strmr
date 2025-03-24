@@ -1,11 +1,8 @@
-
-
 import { useState } from "react"
 import { useRouter } from "next/router"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import { createClient } from "~/utils/supabase/component"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import type { GetServerSideProps } from "next"
@@ -17,22 +14,7 @@ import { Input } from "~/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
 import { Alert, AlertDescription } from "~/components/ui/alert"
 import { Icons } from "~/components/ui/icons"
-
-// Define the form schema with validation
-const signUpSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number",
-    ),
-})
-
-type SignUpFormValues = z.infer<typeof signUpSchema>
+import { SignUpFormValues, signUpSchema } from "~/lib/schemas"
 
 type LoadingStates = {
   isLoadingEmail?: boolean
@@ -100,6 +82,7 @@ export default function SignUp() {
       })
 
       if (signUpError) {
+        console.error("Sign up error details:", signUpError)
         throw signUpError
       }
 
@@ -346,4 +329,3 @@ export default function SignUp() {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   return requireNoAuth(context)
 }
-

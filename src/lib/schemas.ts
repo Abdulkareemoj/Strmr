@@ -38,7 +38,8 @@ export const shortSchema = z.object({
 export type ShortFormValues = z.infer<typeof shortSchema>
 
 export const signUpSchema = z.object({
-  name: z.string().min(2, "Full name must be at least 2 characters"),
+  firstName: z.string().min(2, "Full name must be at least 2 characters"),
+   lastName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   password: z
     .string()
