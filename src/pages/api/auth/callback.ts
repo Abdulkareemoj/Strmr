@@ -5,6 +5,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { code, next = "/dashboard" } = req.query
 
   if (typeof code !== "string") {
+    console.error("Invalid code:", code)
     return res.redirect(`/signin?error=${encodeURIComponent("Invalid code")}`)
   }
 
@@ -24,4 +25,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.redirect(`/signin?error=${encodeURIComponent("An unexpected error occurred")}`)
   }
 }
-
