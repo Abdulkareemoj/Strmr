@@ -65,6 +65,8 @@ export default function SignUp() {
     setSuccess(null)
 
     try {
+      console.log("Submitting sign up form with values:", values)
+
       // Sign up the user with Supabase Auth
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
@@ -85,6 +87,8 @@ export default function SignUp() {
         console.error("Sign up error details:", signUpError)
         throw signUpError
       }
+
+      console.log("Sign up response data:", data)
 
       // Check if email confirmation is required
       if (data.session) {
@@ -119,61 +123,61 @@ export default function SignUp() {
     }
   }
 
-  async function signUpWithGoogle() {
-    setLoadingState({ isLoadingGoogle: true })
-    setError(null)
+  // async function signUpWithGoogle() {
+  //   setLoadingState({ isLoadingGoogle: true })
+  //   setError(null)
 
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      })
+  //   try {
+  //     const { error } = await supabase.auth.signInWithOAuth({
+  //       provider: "google",
+  //       options: {
+  //         redirectTo: `${window.location.origin}/api/auth/callback`,
+  //       },
+  //     })
 
-      if (error) {
-        throw error
-      }
+  //     if (error) {
+  //       throw error
+  //     }
 
-      // The redirect will happen automatically by Supabase
-    } catch (err) {
-      console.error("Google signup failed:", err)
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError("Failed to sign up with Google")
-      }
-      setLoadingState({ isLoadingGoogle: false })
-    }
-  }
+  //     // The redirect will happen automatically by Supabase
+  //   } catch (err) {
+  //     console.error("Google signup failed:", err)
+  //     if (err instanceof Error) {
+  //       setError(err.message)
+  //     } else {
+  //       setError("Failed to sign up with Google")
+  //     }
+  //     setLoadingState({ isLoadingGoogle: false })
+  //   }
+  // }
 
-  async function signUpWithDiscord() {
-    setLoadingState({ isLoadingDiscord: true })
-    setError(null)
+  // async function signUpWithDiscord() {
+  //   setLoadingState({ isLoadingDiscord: true })
+  //   setError(null)
 
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "discord",
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
-        },
-      })
+  //   try {
+  //     const { error } = await supabase.auth.signInWithOAuth({
+  //       provider: "discord",
+  //       options: {
+  //         redirectTo: `${window.location.origin}/api/auth/callback`,
+  //       },
+  //     })
 
-      if (error) {
-        throw error
-      }
+  //     if (error) {
+  //       throw error
+  //     }
 
-      // The redirect will happen automatically by Supabase
-    } catch (err) {
-      console.error("Discord signup failed:", err)
-      if (err instanceof Error) {
-        setError(err.message)
-      } else {
-        setError("Failed to sign up with Discord")
-      }
-      setLoadingState({ isLoadingDiscord: false })
-    }
-  }
+  //     // The redirect will happen automatically by Supabase
+  //   } catch (err) {
+  //     console.error("Discord signup failed:", err)
+  //     if (err instanceof Error) {
+  //       setError(err.message)
+  //     } else {
+  //       setError("Failed to sign up with Discord")
+  //     }
+  //     setLoadingState({ isLoadingDiscord: false })
+  //   }
+  // }
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
@@ -273,7 +277,7 @@ export default function SignUp() {
             </form>
           </Form>
 
-          <div className="relative my-6">
+          {/* <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
@@ -312,7 +316,7 @@ export default function SignUp() {
               )}
               Discord
             </Button>
-          </div>
+          </div> */}
 
           <div className="mt-6 text-center text-sm">
             Already have an account?{" "}
