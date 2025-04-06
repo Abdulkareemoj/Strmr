@@ -1,36 +1,37 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
     provider = "prisma-client-js"
+    // previewFeatures = ["multiSchema"]
 }
 
 datasource db {
     provider  = "postgresql"
     url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
     directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+    // schemas   = ["auth", "public"]
 }
 
 model Profile {
-    id            String    @id @db.Uuid // References auth.users(id)
-    firstName     String?
-    lastName      String?
-    fullName      String?
-    email         String    @unique
-    emailVerified DateTime?
-    avatarUrl     String?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
+    id        String   @id @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    firstName String?
+    lastName  String?
+    username  String?
+    avatarUrl String?
+    bio       String?
 
     // Relations
     videos Video[]
     shorts Short[]
-    role   UserRole @default(USER)
 
-    @@map("profiles") // Maps to the "profiles" table in Postgres
+    @@map("profiles")
 }
 
 model Video {
-    id           Int      @id @default(autoincrement())
+    id           String   @id @default(uuid())
     title        String
     description  String
     videoId      String
@@ -38,18 +39,18 @@ model Video {
     url          String
     thumbnailUrl String
     duration     Int
-    userId       String   @db.Uuid
+    userId       String // Removed @db.Uuid
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
-    // Relation to Profile instead of User
-    profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Profile   Profile? @relation(fields: [profileId], references: [id])
+    profileId String?
 
     @@map("videos")
 }
 
 model Short {
-    id           Int      @id @default(autoincrement())
+    id           String   @id @default(uuid())
     title        String
     description  String
     shortId      String
@@ -57,12 +58,12 @@ model Short {
     url          String
     thumbnailUrl String
     duration     Int
-    userId       String   @db.Uuid
+    profileId    String // Changed from userId to profileId for clarity
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
-    // Relation to Profile instead of User
-    profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+    // Fixed relation
+    profile Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
     @@map("shorts")
 }
@@ -70,4 +71,6 @@ model Short {
 enum UserRole {
     ADMIN
     USER
+
+    // @@schema("public")
 }
