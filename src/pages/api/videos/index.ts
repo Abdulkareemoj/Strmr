@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { NextApiRequest, NextApiResponse } from "next"
+import { env } from "~/env"
   import { createClient } from "~/utils/supabase/component"
 
   export const config = {
@@ -132,7 +133,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
         fileData = Buffer.from(base64Data, "base64")
       } catch (error) {
         console.error("Base64 conversion error:", error)
-        return res.status(400).json({ error: "Failed to process file data" })
+        return res.status(400).json({ error: "Failed to file data" })
       }
 
       const fileName = `${Date.now()}_${title.replace(/\s+/g, "_")}.mp4`
@@ -186,7 +187,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
       console.error("Upload error:", error)
       return res.status(500).json({
         error: error instanceof Error ? error.message : "Failed to upload video",
-        stack: process.env.NODE_ENV === "development" ? (error as Error).stack : undefined,
+        stack: env.NODE_ENV === "development" ? (error as Error).stack : undefined,
       })
     }
   }

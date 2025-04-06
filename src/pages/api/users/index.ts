@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { createClient } from "~/utils/supabase/component"
 import { db } from "~/server/db"
+import { env } from "~/env"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Only allow POST for creating users
@@ -53,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(500).json({
       error: "Failed to create user profile",
-      details: process.env.NODE_ENV === "development" ? error : undefined,
+      details: env.NODE_ENV === "development" ? error : undefined,
     })
   }
 }

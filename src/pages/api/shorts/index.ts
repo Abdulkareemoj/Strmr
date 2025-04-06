@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { NextApiRequest, NextApiResponse } from "next"
+import { env } from "~/env"
 import { createClient } from "~/utils/supabase/component"
 
 export const config = {
@@ -33,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error("API route error:", error)
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Internal server error",
-      details: process.env.NODE_ENV === "development" ? error : undefined,
+      details: env.NODE_ENV === "development" ? error : undefined,
     })
   }
 }
