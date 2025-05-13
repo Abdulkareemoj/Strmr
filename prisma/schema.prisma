@@ -20,10 +20,10 @@ model Profile {
     username  String?
     avatarUrl String?
     bio       String?
-
+    role      UserRole @default(USER)
     // Relations
-    videos Video[]
-    shorts Short[]
+    videos    Video[]
+    shorts    Short[]
 
     @@map("profiles")
 }
