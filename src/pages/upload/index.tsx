@@ -1,9 +1,9 @@
-
-import { type Metadata } from "next";
+import { GetServerSideProps, type Metadata } from "next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import VideoUpload from "./tabs/VideoUpload";
 import ShortsUpload from "./tabs/ShortsUpload";
+import { requireAuth } from "~/lib/auth";
 
 export const metadata: Metadata = {
   title: "Upload",
@@ -16,12 +16,8 @@ export const metadata: Metadata = {
 // });
 
 export default function Upload() {
-
-
   return (
     <main className="mx-auto flex flex-col justify-center p-4">
-    
-
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Video Upload</h1>
         <p className="text-xl text-muted-foreground">
@@ -45,3 +41,6 @@ export default function Upload() {
     </main>
   );
 }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return requireAuth(context);
+};

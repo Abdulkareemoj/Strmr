@@ -1,4 +1,5 @@
-import { type Metadata } from "next";
+import { GetServerSideProps, type Metadata } from "next";
+import { requireAuth } from "~/lib/auth";
 // import { useState } from "react";
 
 export const metadata: Metadata = {
@@ -35,3 +36,6 @@ export default function HomePage() {
     // </div>
   );
 }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return requireAuth(context);
+};

@@ -3,14 +3,12 @@
 
 generator client {
     provider = "prisma-client-js"
-    // previewFeatures = ["multiSchema"]
 }
 
 datasource db {
     provider  = "postgresql"
     url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
     directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-    // schemas   = ["auth", "public"]
 }
 
 model Profile {
@@ -42,9 +40,8 @@ model Video {
     userId       String // Removed @db.Uuid
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
-
-    Profile   Profile? @relation(fields: [profileId], references: [id])
-    profileId String?
+    Profile      Profile? @relation(fields: [profileId], references: [id])
+    profileId    String?
 
     @@map("videos")
 }
@@ -71,6 +68,4 @@ model Short {
 enum UserRole {
     ADMIN
     USER
-
-    // @@schema("public")
 }

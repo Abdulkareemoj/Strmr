@@ -36,7 +36,7 @@ interface SettingsLayoutProps {
   children: React.ReactNode;
 }
 
-export default function imSettingsLayout({ children }: SettingsLayoutProps) {
+export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <>
       <div className="space-y-6 p-10 py-10 pb-16 md:block">

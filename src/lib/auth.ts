@@ -72,38 +72,38 @@ export async function requireNoAuth(context: GetServerSidePropsContext) {
   }
 }
 
-export async function requireAdmin(context: GetServerSidePropsContext) {
-  const { user, profile, session } = await getUser(context)
+// export async function requireAdmin(context: GetServerSidePropsContext) {
+//   const { user, profile, session } = await getUser(context)
 
-  if (!user || !session) {
-    return {
-      redirect: {
-        destination: `/signin?next=${encodeURIComponent(context.resolvedUrl)}`,
-        permanent: false,
-      },
-    }
-  }
+//   if (!user || !session) {
+//     return {
+//       redirect: {
+//         destination: `/signin?next=${encodeURIComponent(context.resolvedUrl)}`,
+//         permanent: false,
+//       },
+//     }
+//   }
 
-  if (profile?.role !== "ADMIN") {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        permanent: false,
-      },
-    }
-  }
+//   if (profile?.role !== "ADMIN") {
+//     return {
+//       redirect: {
+//         destination: "/dashboard",
+//         permanent: false,
+//       },
+//     }
+//   }
 
-  return {
-    props: {
-      user,
-      profile,
-      session: {
-        ...session,
-        accessToken: session.access_token,
-        refreshToken: session.refresh_token,
-        expiresAt: session.expires_at,
-      },
-    },
-  }
-}
+  // return {
+  //   props: {
+  //     user,
+  //     profile,
+  //     session: {
+  //       ...session,
+  //       accessToken: session.access_token,
+  //       refreshToken: session.refresh_token,
+  //       expiresAt: session.expires_at,
+  //     },
+  //   },
+  // }
+
 

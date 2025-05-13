@@ -1,4 +1,6 @@
+import { GetServerSideProps } from "next";
 import VideoList from "~/components/videoList";
+import { requireAuth } from "~/lib/auth";
 
 export default function Trending() {
   return (
@@ -10,3 +12,7 @@ export default function Trending() {
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return requireAuth(context);
+};

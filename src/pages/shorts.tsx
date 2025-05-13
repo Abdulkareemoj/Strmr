@@ -1,4 +1,6 @@
+import { GetServerSideProps } from "next";
 import ShortsList from "~/components/shortsList";
+import { requireAuth } from "~/lib/auth";
 
 export default function Shorts() {
   return (
@@ -10,3 +12,6 @@ export default function Shorts() {
     </div>
   );
 }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return requireAuth(context);
+};
