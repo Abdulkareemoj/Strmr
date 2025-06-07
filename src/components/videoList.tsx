@@ -78,7 +78,7 @@ export default function VideoList() {
 
 function VideoCard({ video }: { video: Video }) {
   return (
-    <div className="overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className="overflow-hidden rounded-lg border bg-card text-card-foreground shadow-xs">
       <div className="relative aspect-video">
         <Link href={`/video/${video.videoId}`}>
           {video.thumbnailUrl ? (
@@ -117,7 +117,7 @@ function VideoListSkeleton() {
       {[...Array(6)].map((_, i) => (
         <div
           key={i}
-          className="overflow-hidden rounded-lg border bg-card shadow-sm"
+          className="overflow-hidden rounded-lg border bg-card shadow-xs"
         >
           <Skeleton className="aspect-video w-full" />
           <div className="p-4">

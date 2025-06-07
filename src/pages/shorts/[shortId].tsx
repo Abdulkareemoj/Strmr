@@ -47,7 +47,7 @@ export default function ShortPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-4 text-2xl font-bold">{shortData.title}</h1>
       <div className="mx-auto max-w-sm">
-        <div className="aspect-[9/16] overflow-hidden rounded-lg">
+        <div className="aspect-9/16 overflow-hidden rounded-lg">
           <VideoPlayer
             src={shortData.url}
             // autoPlay

@@ -47,7 +47,7 @@ export default function Dashboard({ user, profile }: DashboardProps) {
         </Button>
       </div>
 
-      <div className="bg-card rounded-lg p-6 shadow-sm">
+      <div className="bg-card rounded-lg p-6 shadow-xs">
         <h2 className="text-xl font-semibold mb-4">Welcome, {displayName}</h2>
         <p className="text-muted-foreground">You are signed in as {user.email}</p>
         {profile?.role === "ADMIN" && (

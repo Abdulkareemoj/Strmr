@@ -110,7 +110,7 @@ export default function Header() {
             </div>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant={"outline"} size={"icon"}>
+                <Button variant={"outline-solid"} size={"icon"}>
                   <HamburgerMenuIcon className="size-4" />
                 </Button>
               </SheetTrigger>
