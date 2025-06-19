@@ -1,71 +1,46 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { env } from "~/env";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "~/utils/supabase/client";
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "100mb",
-    },
-    responseLimit: false,
-  },
-};
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  // Set proper headers
-  res.setHeader("Content-Type", "application/json");
-
+// Helper to parse JSON body in POST
+async function parseJsonBody(request: NextRequest) {
   try {
-    const supabase = createClient();
-
-    switch (req.method) {
-      case "POST":
-        return handleUpload(req, res, supabase);
-      case "DELETE":
-        return handleDelete(req, res, supabase);
-      case "GET":
-        return handleGet(req, res, supabase);
-      default:
-        return res.status(405).json({ error: "Method not allowed" });
-    }
-  } catch (error) {
-    // Log the full error for debugging
-    console.error("API route error:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Internal server error",
-      details: env.NODE_ENV === "development" ? error : undefined,
-    });
+    return await request.json();
+  } catch {
+    return {};
   }
 }
 
-async function handleUpload(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  supabase: ReturnType<typeof createClient>,
-) {
+// POST /api/videos
+export async function POST(request: NextRequest) {
+  const supabase = createClient();
   try {
+    const body = await parseJsonBody(request);
+
     // Get the user session
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
     if (!session?.user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { file, title, description, public: isPublic, thumbnail } = req.body;
+    const { file, title, description, public: isPublic, thumbnail } = body;
 
     if (!file || !title || !description) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
     // Convert base64 to buffer
     const base64Data = file.split(",")[1];
     if (!base64Data) {
-      return res.status(400).json({ error: "Invalid file format" });
+      return NextResponse.json(
+        { error: "Invalid file format" },
+        { status: 400 },
+      );
     }
     const fileData = Buffer.from(base64Data, "base64");
     const fileName = `${Date.now()}_${title.replace(/\s+/g, "_")}.mp4`;
@@ -80,7 +55,7 @@ async function handleUpload(
 
     if (uploadError) {
       console.error("Storage upload error:", uploadError);
-      return res.status(500).json({ error: uploadError.message });
+      return NextResponse.json({ error: uploadError.message }, { status: 500 });
     }
 
     // Get the public URL
@@ -143,7 +118,10 @@ async function handleUpload(
         console.error("Thumbnail upload error:", thumbnailError);
         // Clean up the video file since we couldn't upload the thumbnail
         await supabase.storage.from("strmrvids").remove([`videos/${fileName}`]);
-        return res.status(500).json({ error: thumbnailError.message });
+        return NextResponse.json(
+          { error: thumbnailError.message },
+          { status: 500 },
+        );
       }
 
       // Get the public URL for the thumbnail
@@ -175,31 +153,35 @@ async function handleUpload(
     if (insertError) {
       console.error("Database insert error:", insertError);
       await supabase.storage.from("strmrvids").remove([`videos/${fileName}`]);
-      return res.status(500).json({ error: insertError.message });
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    return res.status(200).json({ video });
+    return NextResponse.json({ video });
   } catch (error) {
     console.error("Upload error:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Failed to upload video",
-    });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to upload video",
+      },
+      { status: 500 },
+    );
   }
 }
 
-async function handleDelete(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  supabase: ReturnType<typeof createClient>,
-) {
+// DELETE /api/videos?videoId=...
+export async function DELETE(request: NextRequest) {
+  const supabase = createClient();
+  const { searchParams } = new URL(request.url);
+  const videoId = searchParams.get("videoId");
+  if (!videoId) {
+    return NextResponse.json(
+      { error: "No video ID provided" },
+      { status: 400 },
+    );
+  }
   try {
-    const { videoId } = req.query;
-
-    if (!videoId || typeof videoId !== "string") {
-      return res.status(400).json({ error: "No video ID provided" });
-    }
-
-    // First, get the video record
+    // Get the video record
     const { data: video, error: fetchError } = await supabase
       .from("videos")
       .select()
@@ -207,7 +189,7 @@ async function handleDelete(
       .single();
 
     if (fetchError) {
-      return res.status(404).json({ error: "Video not found" });
+      return NextResponse.json({ error: "Video not found" }, { status: 404 });
     }
 
     // Delete from storage
@@ -216,8 +198,10 @@ async function handleDelete(
       .remove([`videos/${video.videoId}`]);
 
     if (storageError) {
-      console.error("Storage delete error:", storageError);
-      return res.status(500).json({ error: storageError.message });
+      return NextResponse.json(
+        { error: storageError.message },
+        { status: 500 },
+      );
     }
 
     // Delete from database
@@ -227,28 +211,28 @@ async function handleDelete(
       .eq("videoId", videoId);
 
     if (deleteError) {
-      console.error("Database delete error:", deleteError);
-      return res.status(500).json({ error: deleteError.message });
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
 
-    return res.status(200).json({ message: "Video deleted successfully" });
+    return NextResponse.json({ message: "Video deleted successfully" });
   } catch (error) {
-    console.error("Delete error:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Failed to delete video",
-    });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to delete video",
+      },
+      { status: 500 },
+    );
   }
 }
 
-async function handleGet(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  supabase: ReturnType<typeof createClient>,
-) {
+// GET /api/videos or /api/videos?videoId=...
+export async function GET(request: NextRequest) {
+  const supabase = createClient();
+  const { searchParams } = new URL(request.url);
+  const videoId = searchParams.get("videoId");
   try {
-    const { videoId } = req.query;
-
-    if (videoId && typeof videoId === "string") {
+    if (videoId) {
       // Get specific video
       const { data: video, error } = await supabase
         .from("videos")
@@ -257,7 +241,7 @@ async function handleGet(
         .single();
 
       if (error) {
-        return res.status(404).json({ error: "Video not found" });
+        return NextResponse.json({ error: "Video not found" }, { status: 404 });
       }
 
       // Check if the video is public or if the user is authenticated
@@ -265,9 +249,10 @@ async function handleGet(
         data: { session },
       } = await supabase.auth.getSession();
       if (!video.public && !session?.user) {
-        return res
-          .status(403)
-          .json({ error: "Forbidden: This video is private" });
+        return NextResponse.json(
+          { error: "Forbidden: This video is private" },
+          { status: 403 },
+        );
       }
 
       // Create a signed URL if needed
@@ -275,7 +260,7 @@ async function handleGet(
         .from("strmrvids")
         .createSignedUrl(`videos/${video.videoId}`, 3600);
 
-      return res.status(200).json({
+      return NextResponse.json({
         ...video,
         url: signedUrl?.signedUrl || video.url,
       });
@@ -288,15 +273,21 @@ async function handleGet(
         .order("created_at", { ascending: false });
 
       if (error) {
-        return res.status(500).json({ error: "Failed to fetch videos" });
+        return NextResponse.json(
+          { error: "Failed to fetch videos" },
+          { status: 500 },
+        );
       }
 
-      return res.status(200).json(videos);
+      return NextResponse.json(videos);
     }
   } catch (error) {
-    console.error("Get error:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Failed to fetch videos",
-    });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to fetch videos",
+      },
+      { status: 500 },
+    );
   }
 }
