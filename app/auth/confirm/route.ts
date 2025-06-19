@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
     });
     if (!error) {
       // redirect user to specified redirect URL or root of app
-      redirect(next);
+      const redirectUrl = new URL(next, request.url);
+      redirect(redirectUrl.toString());
+      return; // Ensure to return after redirect
     }
   }
 

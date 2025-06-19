@@ -27,7 +27,7 @@ export default function VideoList() {
     isValidating,
   } = useQuery<Video[]>(
     supabase
-      .from("Video") // Matches exact table name from schema
+      .from("videos") // Matches exact table name from schema
       .select()
       .eq("public", true)
       .order("id", { ascending: false }),

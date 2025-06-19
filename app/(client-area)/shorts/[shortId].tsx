@@ -1,9 +1,7 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
-import { createClient } from "~/utils/supabase/component";
+import { createClient } from "~/utils/supabase/client";
 import VideoPlayer from "~/components/VideoPlayer";
-import { GetServerSideProps } from "next";
-import { requireAuth } from "~/lib/auth";
 
 const supabase = createClient();
 
@@ -28,7 +26,7 @@ export default function ShortPage() {
           .select("title, url, description")
           .eq("shortId", shortId)
           .single()
-      : null
+      : null,
   );
 
   if (error) {
@@ -57,13 +55,9 @@ export default function ShortPage() {
           />
         </div>
         {shortData.description && (
-          <p className="mt-4 text-muted-foreground">{shortData.description}</p>
+          <p className="text-muted-foreground mt-4">{shortData.description}</p>
         )}
       </div>
     </div>
   );
 }
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  return requireAuth(context);
-};
