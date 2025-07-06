@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/pingSupabase",
-      "schedule": "0 10 * * *"
+      "path": "/api/cron/keep-alive",
+      "schedule": "0 0 * * *"
     }
   ]
 }
