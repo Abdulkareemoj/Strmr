@@ -46,7 +46,7 @@ export default function SignIn() {
   const supabase = createClient();
 
   // Get the next URL from query params
-  const next = searchParams.get("next") || "/dashboard";
+  const next = searchParams.get("next") || "/trending";
 
   // Get error from query params
   const queryError = searchParams.get("error") || undefined;
