@@ -1,4 +1,4 @@
-import ShortsList from "~/components/shortsList";
+// import ShortsList from "~/components/shortsList";
 
 export default function Shorts() {
   return (

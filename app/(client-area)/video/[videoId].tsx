@@ -1,9 +1,7 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
-import { createClient } from "~/utils/supabase/component";
+import { createClient } from "~/utils/supabase/client";
 import VideoPlayer from "~/components/VideoPlayer";
-import { GetServerSideProps } from "next";
-import { requireNoAuth } from "~/lib/auth";
 
 const supabase = createClient();
 

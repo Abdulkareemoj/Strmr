@@ -1,5 +1,3 @@
-import { Inter as FontSans } from "next/font/google";
-import localFont from "next/font/local";
 import type { Metadata } from "next";
 
 import { META_THEME_COLORS, siteConfig } from "~/lib/config";

@@ -1,4 +1,3 @@
-"use client";
 import { type Metadata } from "next";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
@@ -40,7 +39,7 @@ const testimonials = [
     author: "Emily R.",
   },
 ];
-const metadata: Metadata = {
+export const metadata: Metadata = {
   title: "Strmr - Learn Anything, Anytime",
   description:
     "Discover a world of knowledge with our curated educational videos.",

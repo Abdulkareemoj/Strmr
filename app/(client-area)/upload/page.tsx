@@ -1,11 +1,10 @@
-"use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import VideoUpload from "./tabs/VideoUpload";
 import ShortsUpload from "./tabs/ShortsUpload";
 import { Metadata } from "next/types";
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
   title: "Upload",
   description: "Upload Page",
 };
