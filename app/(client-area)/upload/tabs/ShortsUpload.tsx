@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any*/
-import axios from "axios";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* ShortsUpload.tsx — same UI you provided, plus client upload logic */
+"use client";
 import * as React from "react";
-import { useToast } from "~/hooks/use-toast";
+import axios from "axios";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { type ShortFormValues, shortSchema } from "~/lib/validations/schemas";
 
+import { useToast } from "~/hooks/use-toast";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { Input } from "~/components/ui/input";
@@ -23,6 +23,13 @@ import {
 } from "~/components/ui/form";
 import { Switch } from "~/components/ui/switch";
 
+import { type ShortFormValues, shortSchema } from "~/lib/validations/schemas";
+import { uploadVideo } from "~/utils/upload";
+import { createClient } from "~/utils/supabase/client";
+const supabase = createClient();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 export default function ShortsUpload() {
   const [preview, setPreview] = React.useState<string | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = React.useState<string | null>(
@@ -31,216 +38,78 @@ export default function ShortsUpload() {
   const [uploading, setUploading] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
   const { toast } = useToast();
-  const videoRef = React.useRef<HTMLVideoElement>(null);
 
-  const form = useForm<ShortFormValues>({
+  const form = useForm({
     resolver: zodResolver(shortSchema),
     defaultValues: {
       public: true,
       title: "",
       description: "",
-      file: null as any, // Cast to any to satisfy TypeScript
+      file: null as any,
     },
   });
 
-  // Function to generate a thumbnail from the video
-  const generateThumbnail = (videoFile: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      // Create a video element
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.muted = true;
-      video.playsInline = true;
-
-      // Create a URL for the video file
-      const videoUrl = URL.createObjectURL(videoFile);
-      video.src = videoUrl;
-
-      // When the video metadata is loaded, seek to the desired time
-      video.onloadedmetadata = () => {
-        // Seek to 1 second or 25% of the video, whichever is less
-        const seekTime = Math.min(1, video.duration * 0.25);
-        video.currentTime = seekTime;
-
-        // When the video frame is available, capture it
-        video.onseeked = () => {
-          // Create a canvas element
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-
-          // Draw the video frame to the canvas
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            URL.revokeObjectURL(videoUrl);
-            reject(new Error("Could not get canvas context"));
-            return;
-          }
-
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-          // Convert the canvas to a data URL
-          const thumbnailDataUrl = canvas.toDataURL("image/jpeg", 0.8);
-
-          // Clean up
-          URL.revokeObjectURL(videoUrl);
-
-          // Set the thumbnail preview
-          setThumbnailPreview(thumbnailDataUrl);
-
-          // Return the data URL
-          resolve(thumbnailDataUrl);
-        };
-
-        // Handle errors
-        video.onerror = () => {
-          URL.revokeObjectURL(videoUrl);
-          reject(new Error("Error generating thumbnail"));
-        };
-      };
-
-      // Handle errors
-      video.onerror = () => {
-        URL.revokeObjectURL(videoUrl);
-        reject(new Error("Error loading video"));
-      };
-    });
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size before setting
     if (file.size > 50 * 1024 * 1024) {
-      // 50MB
       toast({
         title: "Error",
-        description: "File size exceeds 50MB limit",
+        description: "File size exceeds 50MB",
         variant: "destructive",
       });
       return;
     }
 
     form.setValue("file", file);
-    const videoUrl = URL.createObjectURL(file);
-    setPreview(videoUrl);
+    const url = URL.createObjectURL(file);
+    setPreview(url);
 
-    // Generate thumbnail
-    generateThumbnail(file).catch((error) => {
-      console.error("Error generating thumbnail:", error);
-      toast({
-        title: "Warning",
-        description: "Could not generate thumbnail. Upload may still work.",
-        variant: "destructive",
-      });
-    });
+    // try to generate thumbnail (data URL) — optional
+  };
+
+  const clearSelection = () => {
+    const file = form.getValues("file") as File | null;
+    if (file) URL.revokeObjectURL(preview || "");
+    form.setValue("file", null as any);
+    setPreview(null);
+    setThumbnailPreview(null);
   };
 
   const onSubmit = async (values: ShortFormValues) => {
     setUploading(true);
-    setProgress(0);
-
+    setProgress(10);
     try {
       const file = values.file as File;
-      if (!file) {
-        throw new Error("No file selected");
-      }
+      if (!file) throw new Error("No file selected");
 
-      // Use a promise-based approach for FileReader
-      const readFileAsDataURL = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = () => reject(new Error("Failed to read file"));
-          reader.readAsDataURL(file);
-        });
-      };
-
-      // Update progress to show we're processing
-      setProgress(10);
-
-      // Read the file
-      const base64File = await readFileAsDataURL(file);
-
-      // Get the thumbnail
-      let thumbnailData = thumbnailPreview;
-
-      // If we don't have a thumbnail preview, try to generate one now
-      if (!thumbnailData) {
-        try {
-          thumbnailData = await generateThumbnail(file);
-        } catch (error) {
-          console.error("Error generating thumbnail:", error);
-          // Continue without a thumbnail - the server will handle it
-        }
-      }
-
-      // Update progress to show we're starting upload
-      setProgress(20);
-
-      const { data } = await axios.post(
-        "/api/shorts",
-        {
-          file: base64File,
-          title: values.title,
-          description: values.description,
-          public: values.public,
-          thumbnail: thumbnailData, // Send the thumbnail data
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-          // Increase timeout since we're uploading large files
-          timeout: 300000, // 5 minutes
-          maxBodyLength: Number.POSITIVE_INFINITY,
-          onUploadProgress: (progressEvent) => {
-            const progress = progressEvent.total
-              ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              : 0;
-            setProgress(progress);
-          },
-        },
+      const { videoUrl, thumbnail_url, duration, fileName } = await uploadVideo(
+        file,
+        "shorts",
+        setProgress,
       );
 
-      toast({
-        title: "Success",
-        description: "Short uploaded successfully",
+      await axios.post("/api/shorts", {
+        title: values.title,
+        description: values.description,
+        public: values.public,
+        url: videoUrl,
+        short_id: fileName,
+        thumbnail_url: thumbnail_url,
+        duration,
+        user_id: session?.user.id, //
       });
 
-      // Reset form and preview
-      form.reset({
-        public: true,
-        title: "",
-        description: "",
-        file: null as any,
+      toast({ title: "Success", description: "Short uploaded successfully" });
+      form.reset();
+      clearSelection();
+    } catch (err: any) {
+      toast({
+        title: "Upload failed",
+        description: err?.message ?? "Please try again",
+        variant: "destructive",
       });
-      setPreview(null);
-      setThumbnailPreview(null);
-    } catch (error) {
-      console.error("Upload error:", error);
-      if (axios.isAxiosError(error)) {
-        // Log the full response for debugging
-        console.error("Full error response:", error.response?.data);
-        toast({
-          title: "Error",
-          description:
-            error.response?.data?.error ||
-            error.response?.statusText ||
-            error.message ||
-            "Upload failed",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description:
-            error instanceof Error ? error.message : "Failed to upload video",
-          variant: "destructive",
-        });
-      }
     } finally {
       setUploading(false);
       setProgress(0);
@@ -255,7 +124,7 @@ export default function ShortsUpload() {
             <div className="flex w-full items-center justify-center">
               <label
                 htmlFor="short-upload"
-                className="dark:hover:bg-bray-800 flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <UploadIcon className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400" />
@@ -283,7 +152,6 @@ export default function ShortsUpload() {
             <>
               <div className="relative">
                 <video
-                  ref={videoRef}
                   src={preview}
                   className="h-auto w-full rounded-lg"
                   controls
@@ -293,11 +161,7 @@ export default function ShortsUpload() {
                   variant="destructive"
                   size="icon"
                   className="absolute top-2 right-2"
-                  onClick={() => {
-                    form.setValue("file", null as any);
-                    setPreview(null);
-                    setThumbnailPreview(null);
-                  }}
+                  onClick={clearSelection}
                 >
                   <Cross1Icon className="h-4 w-4" />
                 </Button>
@@ -308,7 +172,7 @@ export default function ShortsUpload() {
                   <p className="mb-2 text-sm font-medium">Thumbnail Preview:</p>
                   <div className="relative h-auto w-32">
                     <img
-                      src={thumbnailPreview || "/placeholder.svg"}
+                      src={thumbnailPreview}
                       alt="Video thumbnail"
                       className="w-full rounded-md object-cover"
                     />
