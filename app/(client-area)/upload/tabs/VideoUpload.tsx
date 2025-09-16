@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 import * as React from "react";
-import { useToast } from "~/hooks/use-toast";
+import axios from "axios";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { UploadIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { type VideoFormValues, videoSchema } from "~/lib/validations/schemas";
-import axios from "axios";
 
+import { useToast } from "~/hooks/use-toast";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { Input } from "~/components/ui/input";
@@ -23,118 +22,97 @@ import {
 } from "~/components/ui/form";
 import { Switch } from "~/components/ui/switch";
 
+import { uploadVideo } from "~/utils/upload";
+
+import { type VideoFormValues, videoSchema } from "~/lib/validations/schemas";
+import { createClient } from "~/utils/supabase/client";
+const supabase = createClient();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 export default function VideoUpload() {
   const [preview, setPreview] = React.useState<string | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = React.useState<string | null>(
+    null,
+  );
   const [uploading, setUploading] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
   const { toast } = useToast();
 
-  const form = useForm<VideoFormValues>({
+  const form = useForm({
     resolver: zodResolver(videoSchema),
     defaultValues: {
       public: true,
       title: "",
       description: "",
-      file: null as any, // Cast to any to satisfy TypeScript
+      file: null as any,
     },
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 100 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size exceeds 100MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
     form.setValue("file", file);
-    setPreview(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+
+    // try to generate thumbnail for video (client-side)
   };
 
-  const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+  const clearSelection = () => {
+    const file = form.getValues("file") as File | null;
+    if (file) URL.revokeObjectURL(preview || "");
+    form.setValue("file", null as any);
+    setPreview(null);
+    setThumbnailPreview(null);
+  };
 
   const onSubmit = async (values: VideoFormValues) => {
     setUploading(true);
-    setProgress(0);
-
+    setProgress(10);
     try {
-      const file = values.file;
-      if (!file) {
-        throw new Error("No file selected");
-      }
+      const file = values.file as File;
+      if (!file) throw new Error("No file selected");
 
-      // Check file size
-      if (file.size > 100 * 1024 * 1024) {
-        // 100MB limit
-        throw new Error("File size exceeds 100MB limit");
-      }
-
-      // Use a promise-based approach for FileReader
-      const readFileAsDataURL = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = () => reject(new Error("Failed to read file"));
-          reader.readAsDataURL(file);
-        });
-      };
-
-      // Update progress to show we're processing
-      setProgress(10);
-
-      // Read the file
-      const base64File = await readFileAsDataURL(file);
-
-      // Update progress to show we're starting upload
-      setProgress(20);
-
-      // Send the file to the server using axios
-      const { data } = await axios.post(
-        "/api/videos",
-        {
-          file: base64File,
-          title: values.title,
-          description: values.description,
-          public: values.public,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          onUploadProgress: (progressEvent) => {
-            const progress = progressEvent.total
-              ? Math.round((progressEvent.loaded * 70) / progressEvent.total) +
-                20
-              : 50;
-            setProgress(Math.min(progress, 90)); // Cap at 90% until we get the response
-          },
-        },
+      const { videoUrl, thumbnail_url, duration, fileName } = await uploadVideo(
+        file,
+        "videos",
+        setProgress,
       );
 
-      setProgress(100);
-
-      toast({
-        title: "Success",
-        description: "Video uploaded successfully",
+      await axios.post("/api/videos", {
+        title: values.title,
+        description: values.description,
+        public: values.public,
+        url: videoUrl,
+        video_id: fileName,
+        thumbnail_url,
+        duration,
+        user_id: session?.user.id, //
       });
 
-      // Reset form and preview
+      toast({ title: "Success", description: "Video uploaded successfully" });
       form.reset();
-      setPreview(null);
-    } catch (error) {
-      console.error("Upload error:", error);
-      let errorMessage = "Failed to upload video";
-
-      if (axios.isAxiosError(error)) {
-        // Extract error message from axios error response
-        errorMessage = error.response?.data?.error || error.message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
+      clearSelection();
+    } catch (err: any) {
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: "Upload failed",
+        description: err?.message ?? "Please try again",
         variant: "destructive",
       });
     } finally {
       setUploading(false);
+      setProgress(0);
     }
   };
 
@@ -146,7 +124,7 @@ export default function VideoUpload() {
             <div className="flex w-full items-center justify-center">
               <label
                 htmlFor="video-upload"
-                className="dark:hover:bg-bray-800 flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <UploadIcon className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400" />
@@ -163,24 +141,7 @@ export default function VideoUpload() {
                   type="file"
                   accept="video/*"
                   className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-
-                    // Check file size before setting
-                    if (file.size > 100 * 1024 * 1024) {
-                      // 100MB
-                      toast({
-                        title: "Error",
-                        description: "File size exceeds 100MB limit",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-
-                    form.setValue("file", file);
-                    setPreview(URL.createObjectURL(file));
-                  }}
+                  onChange={handleFileSelect}
                   disabled={uploading}
                 />
               </label>
@@ -200,14 +161,24 @@ export default function VideoUpload() {
                   variant="destructive"
                   size="icon"
                   className="absolute top-2 right-2"
-                  onClick={() => {
-                    form.setValue("file", null as any);
-                    setPreview(null);
-                  }}
+                  onClick={clearSelection}
                 >
                   <Cross1Icon className="h-4 w-4" />
                 </Button>
               </div>
+
+              {thumbnailPreview && (
+                <div className="mt-4">
+                  <p className="mb-2 text-sm font-medium">Thumbnail Preview:</p>
+                  <div className="relative h-auto w-32">
+                    <img
+                      src={thumbnailPreview}
+                      alt="Video thumbnail"
+                      className="w-full rounded-md object-cover"
+                    />
+                  </div>
+                </div>
+              )}
 
               <FormField
                 control={form.control}
