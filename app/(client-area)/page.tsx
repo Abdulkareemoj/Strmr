@@ -49,7 +49,7 @@ export default function IndexPage() {
     <main className="flex min-h-screen flex-col">
       <div className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
+          <div className=" px-4 md:px-6">
             <div className="flex flex-col items-center space-y-4 text-center">
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -90,7 +90,7 @@ export default function IndexPage() {
           id="features"
           className="w-full bg-gray-100 py-12 md:py-24 lg:py-32 dark:bg-gray-800"
         >
-          <div className="container px-4 md:px-6">
+          <div className=" px-4 md:px-6">
             <motion.h2
               initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -119,7 +119,7 @@ export default function IndexPage() {
           </div>
         </section>
         <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
+          <div className=" px-4 md:px-6">
             <motion.h2
               initial={{ opacity: 0, y: -20 }}
               whileInView={{ opacity: 1, y: 0 }}
