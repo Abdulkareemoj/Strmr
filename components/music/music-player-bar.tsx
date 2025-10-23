@@ -82,7 +82,7 @@ export function MusicPlayerBar() {
   }
 
   return (
-    <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur">
+    <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur sticky bottom-0 w-full">
       <div className="px-4 py-3">
         {/* Progress Bar */}
         <div className="mb-3 flex items-center gap-2">
