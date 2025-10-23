@@ -11,10 +11,10 @@ export default function MusicLayout({
 }) {
   return (
     <MusicPlayerProvider>
-      <div className="bg-background flex h-screen flex-col">
-        <div className="flex flex-1 overflow-hidden">
+      <div className="bg-background flex h-full flex-col">
+        <div className="flex flex-1 overflow-hidden pt-16 sm:pt-20">
           <MusicNav />
-          <main className="flex-1 overflow-auto">{children}</main>
+          <main className="flex-1 overflow-auto pb-24">{children}</main>
         </div>
         <MusicPlayerBar />
         <VidstackAudioPlayer />
