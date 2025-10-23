@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 
 import { META_THEME_COLORS, siteConfig } from "~/lib/config";
 import { fontVariables } from "~/lib/fonts";
-import { LayoutProvider } from "~/hooks/use-layout";
-import { ActiveThemeProvider } from "~/components/active-theme";
 
 import "~/styles/globals.css";
 
@@ -72,18 +70,14 @@ export default function RootLayout({
       <body
         className={cn(
           "text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]",
-          fontVariables,
+          fontVariables
         )}
       >
         <ThemeProvider>
-          <LayoutProvider>
-            <ActiveThemeProvider>
-              {children}
-              <TailwindIndicator />
-              <Toaster position="top-center" />
-              <Analytics />
-            </ActiveThemeProvider>
-          </LayoutProvider>
+          {children}
+          <TailwindIndicator />
+          <Toaster position="top-center" />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>

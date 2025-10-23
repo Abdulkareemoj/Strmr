@@ -13,7 +13,6 @@ export default function LandingLayout({ children }: LandingLayoutProps) {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1 pt-16 sm:pt-20">{children}</main>
-      <SiteFooter />
     </div>
   );
 }
