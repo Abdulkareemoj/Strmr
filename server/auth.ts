@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin } from "better-auth/plugins/admin";
+import { expo } from "@better-auth/expo";
 import { emailOTP, oneTap, username } from "better-auth/plugins";
 import { db, schema } from "~/server/db";
 import { Resend } from "resend";
@@ -33,6 +34,20 @@ export const auth = betterAuth({
       },
     }),
     oneTap(),
+    expo(),
+  ],
+  trustedOrigins: [
+    "http://localhost:8081",
+    "strmr-mb://",
+    ...(process.env.NODE_ENV !== "production"
+      ? [
+          "exp://*/*",
+          "exp://10.0.0.*:*/*",
+          "exp://192.168.*.*:*/*",
+          "exp://172.*.*.*:*/*",
+          "exp://localhost:*/*",
+        ]
+      : []),
   ],
   emailVerification: {
     async sendVerificationEmail({ user, url }) {

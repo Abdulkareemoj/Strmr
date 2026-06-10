@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { SectionHeader } from "~/components/section-header";
 import * as motion from "motion/react-client";
+import ShortsList from "~/components/shortsList";
 
 export default function Shorts() {
   return (
@@ -22,9 +24,11 @@ export default function Shorts() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-center py-12"
+            className="mt-8"
           >
-            <p className="text-neutral-400">Shorts feature coming soon</p>
+            <Suspense fallback={<div className="py-12 text-center text-muted-foreground">Loading shorts...</div>}>
+              <ShortsList />
+            </Suspense>
           </motion.div>
         </div>
       </main>
