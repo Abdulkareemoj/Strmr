@@ -6,7 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { cn } from "~/lib/utils";
-import { toast } from "~/hooks/use-toast";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -36,11 +36,7 @@ const profileFormSchema = z.object({
     .max(30, {
       message: "Username must not be longer than 30 characters.",
     }),
-  email: z
-    .string({
-      required_error: "Please select an email to display.",
-    })
-    .email(),
+  email: z.string().email(),
   bio: z.string().max(160).min(4),
   urls: z
     .array(
@@ -75,8 +71,7 @@ export function ProfileForm() {
   });
 
   function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: "You submitted the following values:",
+    toast("You submitted the following values:", {
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>

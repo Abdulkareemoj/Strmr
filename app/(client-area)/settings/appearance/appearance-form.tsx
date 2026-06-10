@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { cn } from "~/lib/utils";
-import { toast } from "~/hooks/use-toast";
+import { toast } from "sonner";
 import { Button, buttonVariants } from "~/components/ui/button";
 import {
   Form,
@@ -20,13 +20,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 const appearanceFormSchema = z.object({
-  theme: z.enum(["light", "dark"], {
-    required_error: "Please select a theme.",
-  }),
-  font: z.enum(["inter", "manrope", "system"], {
-    invalid_type_error: "Select a font",
-    required_error: "Please select a font.",
-  }),
+  theme: z.enum(["light", "dark"] as const),
+  font: z.enum(["inter", "manrope", "system"] as const),
 });
 
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>;
@@ -43,8 +38,7 @@ export function AppearanceForm() {
   });
 
   function onSubmit(data: AppearanceFormValues) {
-    toast({
-      title: "You submitted the following values:",
+    toast("You submitted the following values:", {
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
