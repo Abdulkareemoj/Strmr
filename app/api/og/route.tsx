@@ -8,7 +8,7 @@ const ogImageSchema = z.object({
   mode: z.enum(["light", "dark"]).default("dark"),
 });
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const interRegular = fetch(
   new URL("../../../assets/fonts/Inter-Regular.ttf", import.meta.url),
