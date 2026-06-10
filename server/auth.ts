@@ -99,12 +99,16 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: [
+        process.env.GOOGLE_WEB_CLIENT_ID as string,
+        process.env.GOOGLE_IOS_CLIENT_ID as string,
+        process.env.GOOGLE_ANDROID_CLIENT_ID as string,
+      ],
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     },
     discord: {
-      clientId: process.env.DISCORD_CLIENT_ID || "",
-      clientSecret: process.env.DISCORD_CLIENT_SECRET || "",
+      clientId: process.env.DISCORD_CLIENT_ID as string,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET,
     },
   },
 });
