@@ -1,18 +1,21 @@
 "use client";
-import { SiteFooter } from "~/components/site-footer";
-
-import Header from "~/components/Header";
+import { usePathname } from "next/navigation";
+import Header from "~/components/shared/header";
 
 interface LandingLayoutProps {
   children: React.ReactNode;
 }
 
 export default function LandingLayout({ children }: LandingLayoutProps) {
+  const pathname = usePathname();
+  const isMusicPage = pathname.startsWith("/music");
   // const user = await getUser();
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 pt-16 sm:pt-20">{children}</main>
+      <main className="flex-1">
+        {children}
+      </main>
     </div>
   );
 }

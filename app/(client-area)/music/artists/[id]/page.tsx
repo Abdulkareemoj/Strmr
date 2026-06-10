@@ -4,7 +4,7 @@ import { use } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Play, Heart, MoreHorizontal } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import { sampleArtists } from "~/lib/sample-music-data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export default function ArtistDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { playAlbum } = useMusicPlayer();
+  const playAlbum = usePlayerStore((s) => s.playAlbum);
 
   const artist = sampleArtists.find((a) => a.id === id);
 

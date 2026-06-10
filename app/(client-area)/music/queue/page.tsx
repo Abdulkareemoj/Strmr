@@ -3,7 +3,7 @@
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Play, X, GripVertical } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import { cn } from "~/lib/utils";
 
 function formatTime(seconds: number) {
@@ -16,11 +16,10 @@ export default function QueuePage() {
   const {
     currentTrack,
     queue,
-    isPlaying,
     playTrack,
     removeFromQueue,
     clearQueue,
-  } = useMusicPlayer();
+  } = usePlayerStore();
 
   if (queue.length === 0) {
     return (
@@ -55,17 +54,18 @@ export default function QueuePage() {
         <div className="divide-y">
           {queue.map((track, index) => (
             <div
-              key={`${track.id}-${index}`}
+              key={track.id}
               className={cn(
                 "group hover:bg-muted/50 flex items-center gap-4 p-4 transition-colors",
                 currentTrack?.id === track.id && "bg-muted",
               )}
             >
               <button
+                type="button"
                 onClick={() => playTrack(track)}
                 className="bg-muted hover:bg-primary hover:text-primary-foreground flex h-12 w-12 items-center justify-center rounded text-sm font-medium transition-colors"
               >
-                {currentTrack?.id === track.id && isPlaying ? (
+                {currentTrack?.id === track.id ? (
                   <div className="flex gap-1">
                     <div className="h-4 w-1 animate-pulse bg-current" />
                     <div className="h-4 w-1 animate-pulse bg-current delay-75" />

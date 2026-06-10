@@ -6,7 +6,7 @@ import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Search, Play } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import {
   sampleTracks,
   sampleAlbums,
@@ -17,7 +17,9 @@ import Link from "next/link";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const { playTrack, playAlbum, playPlaylist } = useMusicPlayer();
+  const playTrack = usePlayerStore((s) => s.playTrack);
+  const playAlbum = usePlayerStore((s) => s.playAlbum);
+  const playPlaylist = usePlayerStore((s) => s.playPlaylist);
 
   const filteredTracks = sampleTracks.filter(
     (track) =>

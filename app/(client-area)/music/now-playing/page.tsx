@@ -18,7 +18,7 @@ import {
   ChevronDown,
   ListMusic,
 } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import { cn } from "~/lib/utils";
 import Link from "next/link";
 
@@ -32,12 +32,11 @@ export default function NowPlayingPage() {
   const {
     currentTrack,
     isPlaying,
-    togglePlay,
     nextTrack,
     previousTrack,
-    playerRef,
     queue,
-  } = useMusicPlayer();
+    setIsPlaying,
+  } = usePlayerStore();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(75);
@@ -47,37 +46,16 @@ export default function NowPlayingPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
 
-  useEffect(() => {
-    const player = playerRef.current;
-    if (!player) return;
-
-    const updateTime = () => {
-      setCurrentTime(player.currentTime);
-      setDuration(player.duration);
-    };
-
-    const interval = setInterval(updateTime, 100);
-    return () => clearInterval(interval);
-  }, [playerRef]);
-
-  useEffect(() => {
-    const player = playerRef.current;
-    if (player) {
-      player.volume = volume / 100;
-      player.muted = isMuted;
-    }
-  }, [volume, isMuted, playerRef]);
-
-  const handleSeek = (value: number[]) => {
-    const player = playerRef.current;
-    if (player) {
-      player.currentTime = value[0];
-      setCurrentTime(value[0]);
-    }
-  };
-
   const toggleMute = () => {
     setIsMuted(!isMuted);
+  };
+
+  const handleSeek = (value: number[]) => {
+    setCurrentTime(value[0]);
+  };
+
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
   };
 
   if (!currentTrack) {

@@ -3,11 +3,11 @@
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Play } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import { sampleTracks } from "~/lib/sample-music-data";
 
 export default function PodcastsPage() {
-  const { playTrack } = useMusicPlayer();
+  const playTrack = usePlayerStore((s) => s.playTrack);
 
   const podcasts = sampleTracks.filter((track) => track.type === "podcast");
 

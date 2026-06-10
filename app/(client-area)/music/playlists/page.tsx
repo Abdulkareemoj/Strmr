@@ -3,12 +3,12 @@
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Play, Plus } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import { samplePlaylists } from "~/lib/sample-music-data";
 import Link from "next/link";
 
 export default function PlaylistsPage() {
-  const { playPlaylist } = useMusicPlayer();
+  const playPlaylist = usePlayerStore((s) => s.playPlaylist);
 
   return (
     <div className="p-6 lg:p-8">

@@ -1,15 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* ShortsUpload.tsx — same UI you provided, plus client upload logic */
 "use client";
 import * as React from "react";
-import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadIcon, Cross1Icon } from "@radix-ui/react-icons";
+import { Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
-import { useToast } from "~/hooks/use-toast";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
-import { Progress } from "~/components/ui/progress";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import {
@@ -24,20 +21,12 @@ import {
 import { Switch } from "~/components/ui/switch";
 
 import { type ShortFormValues, shortSchema } from "~/lib/validations/schemas";
-import { uploadVideo } from "~/utils/upload";
-import { createClient } from "~/utils/supabase/client";
-const supabase = createClient();
-const {
-  data: { session },
-} = await supabase.auth.getSession();
+
 export default function ShortsUpload() {
   const [preview, setPreview] = React.useState<string | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = React.useState<string | null>(
-    null,
-  );
   const [uploading, setUploading] = React.useState(false);
-  const [progress, setProgress] = React.useState(0);
-  const { toast } = useToast();
+  const [file, setFile] = React.useState<File | null>(null);
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(shortSchema),
@@ -49,70 +38,58 @@ export default function ShortsUpload() {
     },
   });
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 50 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "File size exceeds 50MB",
-        variant: "destructive",
-      });
+  const onSubmit = async (values: ShortFormValues) => {
+    if (!file) {
+      toast.error("Please select a short video file");
       return;
     }
 
-    form.setValue("file", file);
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-
-    // try to generate thumbnail (data URL) — optional
-  };
-
-  const clearSelection = () => {
-    const file = form.getValues("file") as File | null;
-    if (file) URL.revokeObjectURL(preview || "");
-    form.setValue("file", null as any);
-    setPreview(null);
-    setThumbnailPreview(null);
-  };
-
-  const onSubmit = async (values: ShortFormValues) => {
     setUploading(true);
-    setProgress(10);
     try {
-      const file = values.file as File;
-      if (!file) throw new Error("No file selected");
-
-      const { videoUrl, thumbnail_url, duration, fileName } = await uploadVideo(
-        file,
-        "shorts",
-        setProgress,
-      );
-
-      await axios.post("/api/shorts", {
-        title: values.title,
-        description: values.description,
-        public: values.public,
-        url: videoUrl,
-        short_id: fileName,
-        thumbnail_url: thumbnail_url,
-        duration,
-        user_id: session?.user.id, //
+      const presignedRes = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: "videos",
+          fileType: file.type,
+        }),
       });
 
-      toast({ title: "Success", description: "Short uploaded successfully" });
+      if (!presignedRes.ok) throw new Error("Failed to get upload URL");
+
+      const { uploadUrl, publicUrl } = await presignedRes.json();
+
+      const uploadRes = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!uploadRes.ok) throw new Error("Failed to upload file");
+
+      const response = await fetch("/api/shorts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: values.title,
+          description: values.description,
+          isPublic: values.public,
+          url: publicUrl,
+          duration: 0,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save short metadata");
+
+      toast.success("Short uploaded successfully");
       form.reset();
-      clearSelection();
+      setPreview(null);
+      setFile(null);
+      router.refresh();
     } catch (err: any) {
-      toast({
-        title: "Upload failed",
-        description: err?.message ?? "Please try again",
-        variant: "destructive",
-      });
+      toast.error(err?.message ?? "Please try again");
     } finally {
       setUploading(false);
-      setProgress(0);
     }
   };
 
@@ -120,126 +97,141 @@ export default function ShortsUpload() {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {!preview && (
-            <div className="flex w-full items-center justify-center">
-              <label
-                htmlFor="short-upload"
-                className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <UploadIcon className="mb-4 h-8 w-8 text-gray-500 dark:text-gray-400" />
-                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    MP4, AVI, MOV (MAX. 50MB)
-                  </p>
-                </div>
-                <Input
-                  id="short-upload"
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                  disabled={uploading}
-                />
-              </label>
-            </div>
-          )}
-
-          {preview && (
-            <>
-              <div className="relative">
-                <video
-                  src={preview}
-                  className="h-auto w-full rounded-lg"
-                  controls
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={clearSelection}
-                >
-                  <Cross1Icon className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {thumbnailPreview && (
-                <div className="mt-4">
-                  <p className="mb-2 text-sm font-medium">Thumbnail Preview:</p>
-                  <div className="relative h-auto w-32">
-                    <img
-                      src={thumbnailPreview}
-                      alt="Video thumbnail"
-                      className="w-full rounded-md object-cover"
-                    />
+          <FormField
+            control={form.control}
+            name="file"
+            render={() => (
+              <FormItem>
+                <FormLabel className="text-neutral-300">Short Video</FormLabel>
+                <FormControl>
+                  <div className="rounded-lg border-2 border-dashed border-neutral-700 bg-neutral-900/50 p-8">
+                    {!file ? (
+                      <label className="flex cursor-pointer flex-col items-center gap-4">
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-neutral-800">
+                          <Upload className="w-6 h-6 text-neutral-400" />
+                        </div>
+                        <p className="text-sm text-neutral-300">
+                          Click to select a short video
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          MP4, WebM (max 100MB, 9:16 recommended)
+                        </p>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) {
+                              setFile(f);
+                              setPreview(URL.createObjectURL(f));
+                            }
+                          }}
+                        />
+                      </label>
+                    ) : (
+                      <div className="flex flex-col items-center gap-4">
+                        {preview && (
+                          <video
+                            src={preview}
+                            className="max-h-48 rounded-lg"
+                            controls
+                          >
+                            <track kind="captions" />
+                          </video>
+                        )}
+                        <p className="text-sm text-neutral-300">
+                          {file.name} ({(file.size / 1024 / 1024).toFixed(1)}MB)
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="border-neutral-700 text-white hover:bg-neutral-800/50"
+                          onClick={() => {
+                            setFile(null);
+                            setPreview(null);
+                          }}
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Change video
+                        </Button>
+                      </div>
+                    )}
                   </div>
+                </FormControl>
+                <FormDescription className="text-neutral-400">
+                  Max 100MB. Vertical format recommended (9:16)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-neutral-300">Title</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter short title"
+                    className="border-neutral-700 bg-neutral-800/50 text-white placeholder:text-neutral-500"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-neutral-300">Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter short description"
+                    className="border-neutral-700 bg-neutral-800/50 text-white placeholder:text-neutral-500 min-h-20"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="public"
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between rounded-lg border border-neutral-800/50 bg-neutral-900/30 p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-neutral-300">Public Short</FormLabel>
+                  <FormDescription className="text-neutral-400">
+                    Make this short visible to all users
+                  </FormDescription>
                 </div>
-              )}
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Short title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Short description"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="public"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Public</FormLabel>
-                      <FormDescription>
-                        Make this short publicly accessible
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {uploading && <Progress value={progress} className="w-full" />}
-
-              <Button type="submit" disabled={uploading} className="w-full">
-                {uploading ? "Uploading..." : "Upload Short"}
-              </Button>
-            </>
-          )}
+          <Button
+            type="submit"
+            className="w-full bg-white text-black hover:bg-neutral-200 font-semibold"
+            disabled={uploading || !file}
+          >
+            {uploading ? "Uploading..." : "Publish Short"}
+          </Button>
         </form>
       </Form>
     </div>

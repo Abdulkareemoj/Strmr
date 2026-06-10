@@ -4,7 +4,7 @@ import { use } from "react";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Play, Heart, MoreHorizontal, Clock } from "lucide-react";
-import { useMusicPlayer } from "~/lib/music-player-context";
+import { usePlayerStore } from "~/stores/player-store";
 import { samplePlaylists } from "~/lib/sample-music-data";
 import { notFound } from "next/navigation";
 
@@ -20,7 +20,8 @@ export default function PlaylistDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { playPlaylist, playTrack } = useMusicPlayer();
+  const playPlaylist = usePlayerStore((s) => s.playPlaylist);
+  const playTrack = usePlayerStore((s) => s.playTrack);
 
   const playlist = samplePlaylists.find((p) => p.id === id);
 
@@ -102,6 +103,7 @@ export default function PlaylistDetailPage({
             {playlist.tracks.map((track, index) => (
               <button
                 key={track.id}
+                type="button"
                 onClick={() => playTrack(track)}
                 className="hover:bg-muted/50 grid w-full grid-cols-[auto_1fr_auto_auto] gap-4 rounded-md p-2 text-left transition-colors"
               >

@@ -1,57 +1,30 @@
-import { useRouter } from "next/router";
-import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
-import { createClient } from "~/utils/supabase/client";
+import { notFound } from "next/navigation";
+import { db } from "~/server/db";
+import { video } from "~/server/db/schema/video-schema";
+import { eq } from "drizzle-orm";
 import VideoPlayer from "~/components/VideoPlayer";
 
-const supabase = createClient();
-
-interface VideoData {
-  title: string;
-  url: string;
-  description: string;
-  thumbnailUrl: string | null;
+interface PageProps {
+  params: Promise<{ videoId: string }>;
 }
 
-export default function VideoPage() {
-  const router = useRouter();
-  const { videoId } = router.query;
+export default async function VideoPage({ params }: PageProps) {
+  const { videoId } = await params;
 
-  const {
-    data: videoData,
-    error,
-    isValidating,
-  } = useQuery<VideoData>(
-    videoId
-      ? supabase
-          .from("Video")
-          .select("title, url, description, thumbnailUrl")
-          .eq("videoId", videoId)
-          .single()
-      : null,
-  );
+  const [videoData] = await db
+    .select()
+    .from(video)
+    .where(eq(video.id, videoId));
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-red-500">
-        Failed to load video. Please try again later.
-      </div>
-    );
-  }
-
-  if (isValidating || !videoData) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  if (!videoData) {
+    notFound();
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-4 text-2xl font-bold">{videoData.title}</h1>
       <div className="aspect-video w-full overflow-hidden rounded-lg">
-        <VideoPlayer
-          src={videoData.url}
-          // poster={videoData.thumbnailUrl || undefined}
-          // controls
-          // className="h-full w-full"
-        />
+        <VideoPlayer src={videoData.url} />
       </div>
       {videoData.description && (
         <p className="text-muted-foreground mt-4">{videoData.description}</p>

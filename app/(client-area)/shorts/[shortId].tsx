@@ -1,44 +1,23 @@
-import { useRouter } from "next/router";
-import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
-import { createClient } from "~/utils/supabase/client";
+import { notFound } from "next/navigation";
+import { db } from "~/server/db";
+import { short } from "~/server/db/schema/short-schema";
+import { eq } from "drizzle-orm";
 import VideoPlayer from "~/components/VideoPlayer";
 
-const supabase = createClient();
-
-interface ShortData {
-  title: string;
-  url: string;
-  description: string;
+interface PageProps {
+  params: Promise<{ shortId: string }>;
 }
 
-export default function ShortPage() {
-  const router = useRouter();
-  const { shortId } = router.query;
+export default async function ShortPage({ params }: PageProps) {
+  const { shortId } = await params;
 
-  const {
-    data: shortData,
-    error,
-    isValidating,
-  } = useQuery<ShortData>(
-    shortId
-      ? supabase
-          .from("Short")
-          .select("title, url, description")
-          .eq("shortId", shortId)
-          .single()
-      : null,
-  );
+  const [shortData] = await db
+    .select()
+    .from(short)
+    .where(eq(short.id, shortId));
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-red-500">
-        Failed to load short. Please try again later.
-      </div>
-    );
-  }
-
-  if (isValidating || !shortData) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  if (!shortData) {
+    notFound();
   }
 
   return (
@@ -46,13 +25,7 @@ export default function ShortPage() {
       <h1 className="mb-4 text-2xl font-bold">{shortData.title}</h1>
       <div className="mx-auto max-w-sm">
         <div className="aspect-9/16 overflow-hidden rounded-lg">
-          <VideoPlayer
-            src={shortData.url}
-            // autoPlay
-            // loop
-            // controls
-            // className="h-full w-full object-cover"
-          />
+          <VideoPlayer src={shortData.url} />
         </div>
         {shortData.description && (
           <p className="text-muted-foreground mt-4">{shortData.description}</p>
