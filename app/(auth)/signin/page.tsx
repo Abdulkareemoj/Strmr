@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "~/utils/supabase/client";
+import { z } from "zod";
 import { AlertCircle } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -26,7 +26,14 @@ import {
 } from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Icons } from "~/components/ui/icons";
-import { SignInFormValues, signInSchema } from "~/lib/validations/schemas";
+import { signIn } from "~/lib/auth-client";
+
+const signInSchema = z.object({
+  email: z.email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type SignInFormValues = z.infer<typeof signInSchema>;
 
 type LoadingStates = {
   isLoadingEmail?: boolean;
@@ -35,23 +42,12 @@ type LoadingStates = {
 };
 
 export default function SignIn() {
-  const [loadingStates, setLoadingStates] = useState<LoadingStates>({
+  const [loadingStates, setLoadingStates] = useState({
     isLoadingEmail: false,
-    isLoadingGoogle: false,
-    isLoadingDiscord: false,
   });
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const supabase = createClient();
 
-  // Get the next URL from query params
-  const next = searchParams.get("next") || "/trending";
-
-  // Get error from query params
-  const queryError = searchParams.get("error") || undefined;
-
-  // Initialize React Hook Form
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -60,133 +56,53 @@ export default function SignIn() {
     },
   });
 
-  function setLoadingState(obj: Partial<LoadingStates>) {
-    setLoadingStates((prev) => ({
-      ...prev,
-      ...obj,
-    }));
-  }
-
-  function isAnyLoading(): boolean {
-    return (
-      Boolean(loadingStates.isLoadingDiscord) ||
-      Boolean(loadingStates.isLoadingGoogle) ||
-      Boolean(loadingStates.isLoadingEmail)
-    );
-  }
-
   async function onSubmit(values: SignInFormValues) {
-    setLoadingState({ isLoadingEmail: true });
+    setLoadingStates({ isLoadingEmail: true });
     setError(null);
 
     try {
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email: values.email,
-          password: values.password,
-        });
+      const result = await signIn.email({
+        email: values.email,
+        password: values.password,
+      });
 
-      if (signInError) {
-        throw signInError;
+      if (result.error) {
+        setError(result.error.message || "Failed to sign in");
+        return;
       }
 
-      if (!data.session) {
-        throw new Error("Failed to sign in");
-      }
-
-      // Redirect to the next URL or dashboard
-      router.push(next);
+      router.push("/trending");
+      router.refresh();
     } catch (err) {
-      console.error("Sign in failed:", err);
-      if (err instanceof Error) {
-        // Format error message to be more user-friendly
-        let message = err.message;
-        if (message.includes("Invalid login")) {
-          message = "Invalid email or password";
-        }
-        setError(message);
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred",
+      );
     } finally {
-      setLoadingState({ isLoadingEmail: false });
-    }
-  }
-
-  async function signInWithGoogle() {
-    setLoadingState({ isLoadingGoogle: true });
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${
-            window.location.origin
-          }/auth/callback?next=${encodeURIComponent(next)}`,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // The redirect will happen automatically by Supabase
-    } catch (err) {
-      console.error("Google login failed:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to sign in with Google");
-      }
-      setLoadingState({ isLoadingGoogle: false });
-    }
-  }
-
-  async function signInWithDiscord() {
-    setLoadingState({ isLoadingDiscord: true });
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "discord",
-        options: {
-          redirectTo: `${
-            window.location.origin
-          }/auth/callback?next=${encodeURIComponent(next)}`,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // The redirect will happen automatically by Supabase
-    } catch (err) {
-      console.error("Discord login failed:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to sign in with Discord");
-      }
-      setLoadingState({ isLoadingDiscord: false });
+      setLoadingStates({ isLoadingEmail: false });
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign In</CardTitle>
-          <CardDescription>
-            Enter your credentials to access your account
+    <main className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md border-neutral-800/50 bg-neutral-900/30 backdrop-blur-sm">
+        <CardHeader className="space-y-3">
+          <CardTitle className="text-3xl font-bold text-white">
+            Welcome back
+          </CardTitle>
+          <CardDescription className="text-neutral-400">
+            Sign in to your Strmr account to continue
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {(error || queryError) && (
-            <Alert variant="destructive" className="mb-4">
+          {error && (
+            <Alert
+              variant="destructive"
+              className="mb-6 border-red-900/50 bg-red-900/20"
+            >
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error || queryError}</AlertDescription>
+              <AlertDescription className="text-red-400">
+                {error}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -197,11 +113,12 @@ export default function SignIn() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-neutral-300">Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="john@example.com"
+                        className="border-neutral-700 bg-neutral-800/50 text-white placeholder:text-neutral-500"
                         {...field}
                       />
                     </FormControl>
@@ -216,16 +133,22 @@ export default function SignIn() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-neutral-300">
+                        Password
+                      </FormLabel>
                       <Link
                         href="/forgot-password"
-                        className="text-primary text-sm hover:underline"
+                        className="text-neutral-400 text-sm hover:text-white"
                       >
                         Forgot password?
                       </Link>
                     </div>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input
+                        type="password"
+                        className="border-neutral-700 bg-neutral-800/50 text-white placeholder:text-neutral-500"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -234,8 +157,8 @@ export default function SignIn() {
 
               <Button
                 type="submit"
-                className="w-full"
-                disabled={isAnyLoading()}
+                className="w-full bg-white text-black hover:bg-neutral-200 font-semibold"
+                disabled={loadingStates.isLoadingEmail}
               >
                 {loadingStates.isLoadingEmail ? (
                   <>
@@ -249,52 +172,12 @@ export default function SignIn() {
             </form>
           </Form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background text-muted-foreground px-2">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={signInWithGoogle}
-              disabled={isAnyLoading()}
-              className="w-full"
-            >
-              {loadingStates.isLoadingGoogle ? (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Icons.google className="mr-2 h-4 w-4" />
-              )}
-              Google
-            </Button>
-
-            <Button
-              variant="outline"
-              type="button"
-              onClick={signInWithDiscord}
-              disabled={isAnyLoading()}
-              className="w-full"
-            >
-              {loadingStates.isLoadingDiscord ? (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Icons.discord className="mr-2 h-4 w-4" />
-              )}
-              Discord
-            </Button>
-          </div>
-
-          <div className="mt-6 text-center text-sm">
+          <div className="mt-6 text-center text-sm text-neutral-400">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-primary hover:underline">
+            <Link
+              href="/signup"
+              className="text-white hover:text-neutral-300 font-semibold"
+            >
               Sign up
             </Link>
           </div>

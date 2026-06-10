@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import * as z from "zod";
+
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "~/utils/supabase/client";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -29,24 +28,22 @@ import {
 } from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Icons } from "~/components/ui/icons";
-import {
-  ForgotPasswordFormValues,
-  forgotPasswordSchema,
-} from "~/lib/validations/schemas";
+import { requestPasswordReset } from "~/lib/auth-client";
+
+const forgotPasswordSchema = z.object({
+  email: z.email("Please enter a valid email address"),
+});
+
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const router = useRouter();
-  const supabase = createClient();
 
-  // Initialize React Hook Form
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues: { email: "" },
   });
 
   async function onSubmit(values: ForgotPasswordFormValues) {
@@ -55,25 +52,19 @@ export default function ForgotPassword() {
     setSuccess(null);
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        values.email,
-        {
-          redirectTo: `${window.location.origin}/reset-password`,
-        },
-      );
+      const result = await requestPasswordReset({
+        email: values.email,
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
 
-      if (resetError) {
-        throw resetError;
+      if (result.error) {
+        setError(result.error.message || "Failed to send reset link");
+        return;
       }
 
       setSuccess("Password reset link sent to your email");
     } catch (err) {
-      console.error("Password reset failed:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

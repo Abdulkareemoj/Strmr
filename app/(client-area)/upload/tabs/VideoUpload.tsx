@@ -1,5 +1,7 @@
 "use client";
 import * as React from "react";
+import * as z from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Upload, X } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -20,13 +22,27 @@ import {
 } from "~/components/ui/form";
 import { Switch } from "~/components/ui/switch";
 
-import { type VideoFormValues, videoSchema } from "~/lib/validations/schemas";
-
 export default function VideoUpload() {
   const [preview, setPreview] = React.useState<string | null>(null);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<File | null>(null);
   const router = useRouter();
+
+  const videoSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+    public: z.boolean().default(true),
+    file: z
+      .any()
+      .nullable()
+      .refine(
+        (file) => file === null || file instanceof File,
+        "Video file must be a valid file or null",
+      )
+      .refine((file) => file !== null, "Video file is required"),
+  });
+
+  type VideoFormValues = z.infer<typeof videoSchema>;
 
   const form = useForm({
     resolver: zodResolver(videoSchema),
@@ -210,7 +226,9 @@ export default function VideoUpload() {
             render={({ field }) => (
               <FormItem className="flex items-center justify-between rounded-lg border border-neutral-800/50 bg-neutral-900/30 p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-neutral-300">Public Video</FormLabel>
+                  <FormLabel className="text-neutral-300">
+                    Public Video
+                  </FormLabel>
                   <FormDescription className="text-neutral-400">
                     Make this video visible to all users
                   </FormDescription>

@@ -1,21 +1,17 @@
-// import { redirect } from "next/navigation";
-
-import Header from "~/components/Header";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { auth } from "~/server/auth";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
 export default async function AuthLayout({ children }: AuthLayoutProps) {
-  // const user = await getUser();
+  const session = await auth.api.getSession({ headers: await headers() });
 
-  // if (user) {
-  //   redirect("/dashboard");
-  // }
-  return (
-    <div className="min-h-screen">
-      <Header />
-      {children}
-    </div>
-  );
+  if (session) {
+    redirect("/trending");
+  }
+
+  return <div className="min-h-screen">{children}</div>;
 }

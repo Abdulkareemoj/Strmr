@@ -7,9 +7,9 @@ import "~/styles/globals.css";
 
 import { cn } from "~/lib/utils";
 import { Toaster } from "~/components/ui/sonner";
-import { Analytics } from "~/components/analytics";
-import { TailwindIndicator } from "~/components/tailwind-indicator";
-import { ThemeProvider } from "~/components/theme-provider";
+import { Analytics } from "~/components/shared/analytics";
+import { TailwindIndicator } from "~/components/shared/tailwind-indicator";
+import { ThemeProvider } from "~/components/shared/theme-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -66,11 +66,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content={META_THEME_COLORS.light} />
+        <meta
+          name="theme-color"
+          media="(prefers-color-scheme: dark)"
+          content={META_THEME_COLORS.dark}
+        />
       </head>
       <body
         className={cn(
           "text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]",
-          fontVariables
+          fontVariables,
         )}
       >
         <ThemeProvider>
