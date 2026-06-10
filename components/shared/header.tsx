@@ -5,10 +5,19 @@ import { Logo } from "~/components/logo";
 import { useScroll } from "~/hooks/use-scroll";
 import { Button } from "~/components/ui/button";
 import { Portal, PortalBackdrop } from "~/components/ui/portal";
-import { X, Menu } from "lucide-react";
+import { Search, X, Menu } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import LoginBtn from "./LoginBtn";
 import { ModeToggle } from "./ModeToggle";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
 
 export const navLinks = [
   { label: "Home", href: "/" },
@@ -20,6 +29,19 @@ export const navLinks = [
 export default function Header() {
   const scrolled = useScroll(10);
   const [open, setOpen] = React.useState(false);
+  const [commandOpen, setCommandOpen] = React.useState(false);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setCommandOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   return (
     <header
@@ -37,16 +59,26 @@ export default function Header() {
           <Logo className="h-4" aria-label="Strmr" />
         </Link>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Button asChild key={link.label} size="sm" variant="ghost">
               <Link href={link.href}>{link.label}</Link>
             </Button>
           ))}
-          <ModeToggle />
-          <LoginBtn />
         </div>
 
+        <div className="hidden items-center gap-1 md:flex">
+          <ModeToggle />
+          <LoginBtn />
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setCommandOpen(true)}
+            aria-label="Search"
+          >
+            <Search className="size-4" />
+          </Button>
+        </div>
         <div className="md:hidden flex items-center gap-2">
           <ModeToggle />
           <Button
@@ -90,6 +122,56 @@ export default function Header() {
           )}
         </div>
       </nav>
+
+      <CommandDialog
+        open={commandOpen}
+        onOpenChange={setCommandOpen}
+        title="Search"
+      >
+        <CommandInput
+          placeholder="Search content or navigate to..."
+          onValueChange={(value) => {
+            if (value.startsWith("/")) {
+              const path = value.slice(1);
+              setCommandOpen(false);
+              router.push(`/search?q=${path}`);
+            }
+          }}
+        />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Quick Links">
+            {navLinks.map((link) => (
+              <CommandItem
+                key={link.href}
+                onSelect={() => {
+                  setCommandOpen(false);
+                  router.push(link.href);
+                }}
+              >
+                <Search className="mr-2 size-4" />
+                <span>{link.label}</span>
+              </CommandItem>
+            ))}
+            <CommandItem
+              onSelect={() => {
+                setCommandOpen(false);
+                router.push("/upload");
+              }}
+            >
+              <span>Upload</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => {
+                setCommandOpen(false);
+                router.push("/settings");
+              }}
+            >
+              <span>Settings</span>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
     </header>
   );
 }
