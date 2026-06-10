@@ -59,6 +59,7 @@ export async function GET(request: Request) {
             width={48}
             height={48}
           >
+            <title>Strmr</title>
             <rect width="256" height="256" fill="none"></rect>
             <line
               x1="208"
