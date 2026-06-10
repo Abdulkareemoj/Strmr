@@ -7,12 +7,6 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentCard } from "~/components/content-card";
 import { SearchIcon, Film, Music, Play } from "lucide-react";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Search",
-  description: "Search across videos, shorts, and music",
-};
 
 type SearchItem = {
   id: string;
@@ -43,12 +37,20 @@ export default function Search() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&category=${cat}`);
+      const res = await fetch(
+        `/api/search?q=${encodeURIComponent(q)}&category=${cat}`,
+      );
       const data = await res.json();
       const items: SearchItem[] = [];
-      (data.videos || []).forEach((v: any) => items.push({ ...v, type: "video" }));
-      (data.shorts || []).forEach((s: any) => items.push({ ...s, type: "short" }));
-      (data.music || []).forEach((m: any) => items.push({ ...m, type: "music" }));
+      (data.videos || []).forEach((v: any) =>
+        items.push({ ...v, type: "video" }),
+      );
+      (data.shorts || []).forEach((s: any) =>
+        items.push({ ...s, type: "short" }),
+      );
+      (data.music || []).forEach((m: any) =>
+        items.push({ ...m, type: "music" }),
+      );
       setResults(items);
     } catch {
       setResults([]);
@@ -85,7 +87,13 @@ export default function Search() {
         </Button>
       </div>
 
-      <Tabs value={category} onValueChange={(v) => { setCategory(v); search(query, v); }}>
+      <Tabs
+        value={category}
+        onValueChange={(v) => {
+          setCategory(v);
+          search(query, v);
+        }}
+      >
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="videos">
@@ -102,7 +110,9 @@ export default function Search() {
         {["all", "videos", "shorts", "music"].map((cat) => (
           <TabsContent key={cat} value={cat} className="mt-6">
             {loading ? (
-              <div className="py-12 text-center text-muted-foreground">Searching...</div>
+              <div className="py-12 text-center text-muted-foreground">
+                Searching...
+              </div>
             ) : results.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
                 {query.trim()
@@ -120,8 +130,14 @@ export default function Search() {
                     href={`/${item.type === "music" ? "music" : item.type}/${item.id}`}
                     type={item.type === "music" ? "audio" : item.type}
                     badge={{
-                      text: item.type.charAt(0).toUpperCase() + item.type.slice(1),
-                      variant: item.type === "video" ? "default" : item.type === "short" ? "secondary" : "outline",
+                      text:
+                        item.type.charAt(0).toUpperCase() + item.type.slice(1),
+                      variant:
+                        item.type === "video"
+                          ? "default"
+                          : item.type === "short"
+                            ? "secondary"
+                            : "outline",
                     }}
                   />
                 ))}
