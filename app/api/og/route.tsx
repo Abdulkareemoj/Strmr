@@ -1,4 +1,3 @@
-/*eslint-disable @typescript-eslint/no-unused-vars*/
 import { ImageResponse } from "@vercel/og";
 
 import * as z from "zod";
