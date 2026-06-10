@@ -1,0 +1,21 @@
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
+  sharp: true
+minimumReleaseAgeExclude:
+  - '@better-auth/core@1.6.15'
+  - '@better-auth/drizzle-adapter@1.6.15'
+  - '@better-auth/kysely-adapter@1.6.15'
+  - '@better-auth/memory-adapter@1.6.15'
+  - '@better-auth/mongo-adapter@1.6.15'
+  - '@better-auth/prisma-adapter@1.6.15'
+  - '@better-auth/telemetry@1.6.15'
+  - '@tailwindcss/typography@0.5.20'
+  - '@typescript-eslint/parser@8.61.0'
+  - '@typescript-eslint/project-service@8.61.0'
+  - '@typescript-eslint/scope-manager@8.61.0'
+  - '@typescript-eslint/tsconfig-utils@8.61.0'
+  - '@typescript-eslint/types@8.61.0'
+  - '@typescript-eslint/typescript-estree@8.61.0'
+  - '@typescript-eslint/visitor-keys@8.61.0'
+  - better-auth@1.6.15
