@@ -1,45 +1,36 @@
+"use client";
 import * as React from "react";
 import Link from "next/link";
-import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
-import { createClient } from "~/utils/supabase/client";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { getPublicShorts } from "~/lib/actions";
 
 interface Short {
-  id: number;
+  id: string;
   title: string;
-  description: string;
+  description: string | null;
   url: string;
-  thumbnailUrl: string | null;
-  duration: number;
-  shortId: string;
+  thumbnail: string | null;
+  duration: number | null;
+  isPublic: boolean;
   userId: string;
-  public: boolean;
+  views: number;
 }
 
-const supabase = createClient();
-
 export default function ShortsList() {
-  const {
-    data: shorts,
-    error,
-    isValidating,
-  } = useQuery<Short[]>(
-    supabase
-      .from("Short")
-      .select()
-      .eq("public", true)
-      .order("id", { ascending: false }),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
-  );
+  const [shorts, setShorts] = React.useState<Short[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  if (isValidating && !shorts) {
-    return <ShortsListSkeleton />;
-  }
+  React.useEffect(() => {
+    getPublicShorts()
+      .then(setShorts)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <ShortsListSkeleton />;
 
   if (error) {
     return (
@@ -48,15 +39,15 @@ export default function ShortsList() {
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Failed to load shorts. Please try again.
-          {error.message && (
-            <span className="mt-1 block text-sm">Error: {error.message}</span>
+          {error && (
+            <span className="mt-1 block text-sm">Error: {error}</span>
           )}
         </AlertDescription>
       </Alert>
     );
   }
 
-  if (!shorts?.length) {
+  if (!shorts.length) {
     return (
       <div className="py-12 text-center">
         <h3 className="text-lg font-semibold">No shorts found</h3>
@@ -79,13 +70,13 @@ export default function ShortsList() {
 function ShortCard({ short }: { short: Short }) {
   return (
     <Link
-      href={`/short/${short.shortId}`}
+      href={`/shorts/${short.id}`}
       className="group overflow-hidden rounded-lg shadow-md transition-shadow hover:shadow-lg"
     >
       <div className="relative">
-        {short.thumbnailUrl ? (
+        {short.thumbnail ? (
           <img
-            src={short.thumbnailUrl || "/placeholder.svg"}
+            src={short.thumbnail || "/placeholder.svg"}
             alt={short.title}
             className="aspect-square w-full object-cover"
           />
@@ -130,7 +121,8 @@ function ShortsListSkeleton() {
   );
 }
 
-function formatDuration(seconds: number): string {
+function formatDuration(seconds: number | null): string {
+  if (seconds === null) return "--:--";
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;

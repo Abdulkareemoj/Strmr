@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "~/components/ui/button";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Home,
   Search,
@@ -14,6 +12,18 @@ import {
   Mic2,
   Radio,
 } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "~/components/ui/sidebar";
 
 const navItems = [
   { href: "/music", label: "Home", icon: Home },
@@ -29,57 +39,74 @@ const libraryItems = [
   { href: "/music/liked", label: "Liked Songs", icon: Heart },
 ];
 
-export function MusicNav() {
+export function MusicNav({ className }: { className?: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="bg-muted/30 hidden w-64 border-r lg:block">
-      <div className="flex h-full flex-col">
-        <div className="border-b p-6">
-          <h1 className="text-2xl font-bold">Music</h1>
-        </div>
-        <ScrollArea className="flex-1">
-          <nav className="space-y-1 p-4">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Button
-                  key={item.href}
-                  variant={pathname === item.href ? "secondary" : "ghost"}
-                  className="w-full justify-start gap-3"
-                  asChild
-                >
-                  <Link href={item.href}>
-                    <Icon className="h-5 w-5" />
-                    {item.label}
-                  </Link>
-                </Button>
-              );
-            })}
-            <div className="my-4 border-t pt-4">
-              <p className="text-muted-foreground mb-2 px-3 text-xs font-semibold uppercase">
-                Library
-              </p>
+    <Sidebar collapsible="icon" className={className}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/music">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Disc className="size-4" />
+                </div>
+                <span className="text-base font-bold">Music</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                    >
+                      <Link href={item.href}>
+                        <Icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Library</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               {libraryItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Button
-                    key={item.href}
-                    variant={pathname === item.href ? "secondary" : "ghost"}
-                    className="w-full justify-start gap-3"
-                    asChild
-                  >
-                    <Link href={item.href}>
-                      <Icon className="h-5 w-5" />
-                      {item.label}
-                    </Link>
-                  </Button>
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                    >
+                      <Link href={item.href}>
+                        <Icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 );
               })}
-            </div>
-          </nav>
-        </ScrollArea>
-      </div>
-    </aside>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   );
 }

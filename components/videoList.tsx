@@ -1,45 +1,36 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { useQuery } from "@supabase-cache-helpers/postgrest-swr";
-import { createClient } from "~/utils/supabase/client";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { AlertCircle, Play } from "lucide-react";
+import { getPublicVideos } from "~/lib/actions";
 
 interface Video {
-  id: number; // Changed to number as per schema
+  id: string;
   title: string;
-  description: string;
+  description: string | null;
   url: string;
-  thumbnailUrl: string | null;
-  duration: number;
-  videoId: string;
+  thumbnail: string | null;
+  duration: number | null;
+  isPublic: boolean;
   userId: string;
-  public: boolean;
+  views: number;
 }
 
 export default function VideoList() {
-  const supabase = createClient();
-  const {
-    data: videos,
-    error,
-    isValidating,
-  } = useQuery<Video[]>(
-    supabase
-      .from("videos") // Matches exact table name from schema
-      .select()
-      .eq("public", true)
-      .order("id", { ascending: false }),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
-  );
+  const [videos, setVideos] = React.useState<Video[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  if (isValidating && !videos) {
-    return <VideoListSkeleton />;
-  }
+  React.useEffect(() => {
+    getPublicVideos()
+      .then(setVideos)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <VideoListSkeleton />;
 
   if (error) {
     return (
@@ -48,15 +39,13 @@ export default function VideoList() {
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
           Failed to load videos. Please try again.
-          {error.message && (
-            <span className="mt-1 block text-sm">Error: {error.message}</span>
-          )}
+          <span className="mt-1 block text-sm">Error: {error}</span>
         </AlertDescription>
       </Alert>
     );
   }
 
-  if (!videos?.length) {
+  if (!videos.length) {
     return (
       <div className="py-12 text-center">
         <h3 className="text-lg font-semibold">No videos found</h3>
@@ -80,10 +69,10 @@ function VideoCard({ video }: { video: Video }) {
   return (
     <div className="bg-card text-card-foreground overflow-hidden rounded-lg border shadow-xs">
       <div className="relative aspect-video">
-        <Link href={`/video/${video.videoId}`}>
-          {video.thumbnailUrl ? (
+        <Link href={`/video/${video.id}`}>
+          {video.thumbnail ? (
             <img
-              src={video.thumbnailUrl || "/placeholder.svg"}
+              src={video.thumbnail || "/placeholder.svg"}
               alt={video.title}
               className="h-full w-full object-cover"
             />
