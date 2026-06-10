@@ -1,4 +1,4 @@
-import type { Track, Album, Artist, Playlist } from "./music-player-context"
+import type { Track, Album, Artist, Playlist } from "~/stores/player-store"
 
 export const sampleTracks: Track[] = [
   {
