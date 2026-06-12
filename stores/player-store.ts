@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { MediaRemoteControl } from "@vidstack/react";
 
 export interface Track {
   id: string;
@@ -35,10 +36,17 @@ export interface Playlist {
   tracks: Track[];
 }
 
+// Module-level remote control reference – set by PlayerBarContent on mount
+let _remote: MediaRemoteControl | null = null;
+
 interface PlayerState {
   currentTrack: Track | null;
   queue: Track[];
   isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  muted: boolean;
 
   playTrack: (track: Track) => void;
   playAlbum: (album: Album, startIndex?: number) => void;
@@ -50,12 +58,31 @@ interface PlayerState {
   previousTrack: () => void;
   setQueue: (tracks: Track[]) => void;
   setIsPlaying: (playing: boolean) => void;
+
+  // Remote control bridge
+  registerRemote: (remote: MediaRemoteControl) => void;
+  togglePlayback: () => void;
+  seekTo: (time: number) => void;
+  setVolume: (level: number) => void;
+  toggleMuted: () => void;
+
+  // Called by PlayerBarContent to sync Vidstack state into the store
+  syncPlaybackState: (state: {
+    currentTime: number;
+    duration: number;
+    volume: number;
+    muted: boolean;
+  }) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   currentTrack: null,
   queue: [],
   isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  volume: 1,
+  muted: false,
 
   playTrack: (track) => {
     set({ currentTrack: track, isPlaying: true });
@@ -115,5 +142,38 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
   setIsPlaying: (playing) => {
     set({ isPlaying: playing });
+  },
+
+  registerRemote: (remote) => {
+    _remote = remote;
+  },
+
+  togglePlayback: () => {
+    const { isPlaying } = get();
+    if (isPlaying) {
+      _remote?.pause();
+    } else {
+      _remote?.play();
+    }
+    set({ isPlaying: !isPlaying });
+  },
+
+  seekTo: (time) => {
+    _remote?.seek(time);
+    set({ currentTime: time });
+  },
+
+  setVolume: (level) => {
+    _remote?.changeVolume(level);
+    set({ volume: level, muted: level === 0 });
+  },
+
+  toggleMuted: () => {
+    _remote?.toggleMuted();
+    set((state) => ({ muted: !state.muted }));
+  },
+
+  syncPlaybackState: (state) => {
+    set(state);
   },
 }));
