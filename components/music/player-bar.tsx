@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MediaPlayer,
   MediaProvider,
@@ -33,6 +33,8 @@ export function PlayerBar() {
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const setIsPlaying = usePlayerStore((s) => s.setIsPlaying);
   const nextTrack = usePlayerStore((s) => s.nextTrack);
+  const registerRemote = usePlayerStore((s) => s.registerRemote);
+  const syncPlaybackState = usePlayerStore((s) => s.syncPlaybackState);
 
   if (!currentTrack) return null;
 
@@ -48,13 +50,27 @@ export function PlayerBar() {
         className="w-full"
       >
         <MediaProvider />
-        <PlayerBarContent />
+        <PlayerBarContent
+          registerRemote={registerRemote}
+          syncPlaybackState={syncPlaybackState}
+        />
       </MediaPlayer>
     </div>
   );
 }
 
-function PlayerBarContent() {
+function PlayerBarContent({
+  registerRemote,
+  syncPlaybackState,
+}: {
+  registerRemote: (remote: ReturnType<typeof useMediaRemote>) => void;
+  syncPlaybackState: (state: {
+    currentTime: number;
+    duration: number;
+    volume: number;
+    muted: boolean;
+  }) => void;
+}) {
   const remote = useMediaRemote();
   const paused = useMediaState("paused");
   const currentTime = useMediaState("currentTime");
@@ -65,6 +81,17 @@ function PlayerBarContent() {
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const nextTrack = usePlayerStore((s) => s.nextTrack);
   const previousTrack = usePlayerStore((s) => s.previousTrack);
+  const togglePlayback = usePlayerStore((s) => s.togglePlayback);
+
+  const registered = useRef(false);
+  if (!registered.current) {
+    registerRemote(remote);
+    registered.current = true;
+  }
+
+  useEffect(() => {
+    syncPlaybackState({ currentTime, duration, volume, muted });
+  }, [currentTime, duration, volume, muted, syncPlaybackState]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -173,7 +200,7 @@ function PlayerBarContent() {
             <Button
               size="icon"
               className="h-9 w-9 rounded-full"
-              onClick={() => remote.togglePaused()}
+              onClick={() => togglePlayback()}
             >
               {paused ? (
                 <Play className="h-4 w-4 fill-current pl-0.5" />
