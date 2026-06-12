@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -7,24 +7,36 @@ import {
   ArrowRight,
   ChevronDown,
   ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import {
-  ALL_CONTENT,
   CATEGORIES,
   categoryColor,
-  type Category,
-  type Content,
 } from "~/lib/data/content";
 import { cn } from "~/lib/utils";
 import { useFilterStore, NAV_TABS } from "~/stores/filter-store";
 
+type ContentItem = {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string | null;
+  url: string;
+  category: keyof typeof categoryColor;
+  duration: number;
+  durationLabel: string;
+  contentType: string;
+  author: string;
+  views: number;
+};
+
 const PAGE_SIZE = 12;
 
-function ContentCard({ content }: { content: Content }) {
+function ContentCard({ content }: { content: ContentItem }) {
   return (
     <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-ring">
       <div className="flex aspect-video items-center justify-center bg-muted">
@@ -209,8 +221,23 @@ export function BrowseSection() {
     setPage,
   } = useFilterStore();
 
+  const [allContent, setAllContent] = useState<ContentItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/content")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.content) {
+          setAllContent(data.content);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   const filtered = useMemo(() => {
-    return ALL_CONTENT.filter((item) => {
+    return allContent.filter((item) => {
       const q = search.trim().toLowerCase();
       if (q && !item.title.toLowerCase().includes(q)) return false;
       if (activeTab !== "All" && item.category !== activeTab) return false;
@@ -222,7 +249,7 @@ export function BrowseSection() {
       if (item.duration > appliedDuration) return false;
       return true;
     });
-  }, [search, activeTab, selectedCategories, appliedDuration]);
+  }, [search, activeTab, selectedCategories, appliedDuration, allContent]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
@@ -230,6 +257,14 @@ export function BrowseSection() {
     (current - 1) * PAGE_SIZE,
     current * PAGE_SIZE,
   );
+
+  if (loading) {
+    return (
+      <section className="mx-auto flex max-w-7xl items-center justify-center px-6 py-16">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-12">

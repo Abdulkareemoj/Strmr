@@ -1,17 +1,53 @@
 "use client";
-import { useState } from "react";
-import { ImageIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ImageIcon, Loader2 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  FEATURED_CONTENT,
-  categoryColor,
-} from "~/lib/data/content";
+import { categoryColor } from "~/lib/data/content";
 import { cn } from "~/lib/utils";
 
+type ContentItem = {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string | null;
+  url: string;
+  category: keyof typeof categoryColor;
+  duration: number;
+  durationLabel: string;
+  contentType: string;
+  author: string;
+  views: number;
+};
+
 export function FeaturedSection() {
+  const [featured, setFeatured] = useState<ContentItem[]>([]);
   const [active, setActive] = useState(0);
-  const featured = FEATURED_CONTENT[active];
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/content")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.featured) {
+          setFeatured(data.featured);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="mx-auto flex max-w-7xl items-center justify-center px-6 py-16">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </section>
+    );
+  }
+
+  if (featured.length === 0) return null;
+
+  const activeItem = featured[active];
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-8">
@@ -25,17 +61,17 @@ export function FeaturedSection() {
             <div className="mb-3 flex gap-2">
               <Badge
                 className={cn(
-                  categoryColor[featured.category],
+                  categoryColor[activeItem.category],
                   "border",
                 )}
               >
-                {featured.category}
+                {activeItem.category}
               </Badge>
-              <Badge variant="secondary">{featured.durationLabel}</Badge>
+              <Badge variant="secondary">{activeItem.durationLabel}</Badge>
             </div>
-            <h3 className="text-xl font-semibold">{featured.title}</h3>
+            <h3 className="text-xl font-semibold">{activeItem.title}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {featured.description}
+              {activeItem.description}
             </p>
             <Button variant="outline" className="mt-5">
               Watch Now
@@ -44,7 +80,7 @@ export function FeaturedSection() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {FEATURED_CONTENT.map((item, i) => (
+          {featured.map((item, i) => (
             <button
               type="button"
               key={item.id}
