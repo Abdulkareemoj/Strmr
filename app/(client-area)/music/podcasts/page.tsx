@@ -1,15 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Play } from "lucide-react";
-import { usePlayerStore } from "~/stores/player-store";
-import { sampleTracks } from "~/lib/sample-music-data";
+import { usePlayerStore, type Track } from "~/stores/player-store";
+
+function dbTrackToTrack(dbTrack: any): Track {
+  return {
+    id: dbTrack.id,
+    title: dbTrack.title,
+    artist: dbTrack.artist || "Unknown",
+    album: dbTrack.album || "Unknown",
+    duration: dbTrack.duration || 0,
+    coverUrl: dbTrack.coverUrl || "",
+    audioUrl: dbTrack.url,
+    type: "podcast",
+  };
+}
 
 export default function PodcastsPage() {
   const playTrack = usePlayerStore((s) => s.playTrack);
+  const [podcasts, setPodcasts] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const podcasts = sampleTracks.filter((track) => track.type === "podcast");
+  useEffect(() => {
+    fetch("/api/music?type=podcast")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setPodcasts(data.map(dbTrackToTrack));
+        else setPodcasts([]);
+      })
+      .catch(() => setPodcasts([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="p-6 lg:p-8">
@@ -18,7 +42,9 @@ export default function PodcastsPage() {
         <p className="text-muted-foreground mt-1">Your podcast subscriptions</p>
       </div>
 
-      {podcasts.length === 0 ? (
+      {loading ? (
+        <div className="flex h-64 items-center justify-center text-muted-foreground">Loading...</div>
+      ) : podcasts.length === 0 ? (
         <div className="flex h-64 items-center justify-center">
           <div className="text-center">
             <p className="text-muted-foreground text-lg">No podcasts yet</p>
@@ -48,12 +74,8 @@ export default function PodcastsPage() {
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="mb-1 line-clamp-1 font-semibold">
-                  {podcast.title}
-                </h3>
-                <p className="text-muted-foreground line-clamp-1 text-sm">
-                  {podcast.artist}
-                </p>
+                <h3 className="mb-1 line-clamp-1 font-semibold">{podcast.title}</h3>
+                <p className="text-muted-foreground line-clamp-1 text-sm">{podcast.artist}</p>
               </div>
             </Card>
           ))}

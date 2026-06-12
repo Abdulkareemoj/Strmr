@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Slider } from "~/components/ui/slider";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -32,31 +32,22 @@ export default function NowPlayingPage() {
   const {
     currentTrack,
     isPlaying,
+    currentTime,
+    duration,
+    volume,
+    muted,
     nextTrack,
     previousTrack,
     queue,
-    setIsPlaying,
+    togglePlayback,
+    seekTo,
+    setVolume,
+    toggleMuted,
   } = usePlayerStore();
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(75);
-  const [isMuted, setIsMuted] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [repeatMode, setRepeatMode] = useState<"off" | "all" | "one">("off");
   const [isLiked, setIsLiked] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
-  const handleSeek = (value: number[]) => {
-    setCurrentTime(value[0]);
-  };
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
 
   if (!currentTrack) {
     return (
@@ -119,7 +110,7 @@ export default function NowPlayingPage() {
               value={[currentTime]}
               max={duration || 100}
               step={0.1}
-              onValueChange={handleSeek}
+              onValueChange={(value) => seekTo(value[0])}
               className="mb-2"
             />
             <div className="text-muted-foreground flex justify-between text-xs tabular-nums">
@@ -146,7 +137,7 @@ export default function NowPlayingPage() {
             >
               <SkipBack className="h-6 w-6" />
             </Button>
-            <Button size="icon" className="h-16 w-16" onClick={togglePlay}>
+            <Button size="icon" className="h-16 w-16" onClick={togglePlayback}>
               {isPlaying ? (
                 <Pause className="h-8 w-8 fill-current" />
               ) : (
@@ -190,21 +181,18 @@ export default function NowPlayingPage() {
               <Heart className={cn("h-6 w-6", isLiked && "fill-current")} />
             </Button>
             <div className="flex items-center gap-2">
-              <Button size="icon" variant="ghost" onClick={toggleMute}>
-                {isMuted || volume === 0 ? (
+              <Button size="icon" variant="ghost" onClick={toggleMuted}>
+                {muted || volume === 0 ? (
                   <VolumeX className="h-5 w-5" />
                 ) : (
                   <Volume2 className="h-5 w-5" />
                 )}
               </Button>
               <Slider
-                value={[isMuted ? 0 : volume]}
+                value={[muted ? 0 : Math.round(volume * 100)]}
                 max={100}
                 step={1}
-                onValueChange={(value) => {
-                  setVolume(value[0]);
-                  setIsMuted(false);
-                }}
+                onValueChange={(value) => setVolume(value[0] / 100)}
                 className="w-24"
               />
             </div>

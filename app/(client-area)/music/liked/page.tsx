@@ -1,16 +1,46 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Play } from "lucide-react";
-import { usePlayerStore } from "~/stores/player-store";
-import { sampleTracks } from "~/lib/sample-music-data";
+import { usePlayerStore, type Track } from "~/stores/player-store";
+
+function dbTrackToTrack(dbTrack: any): Track {
+  return {
+    id: dbTrack.id,
+    title: dbTrack.title,
+    artist: dbTrack.artist || "Unknown",
+    album: dbTrack.album || "Unknown",
+    duration: dbTrack.duration || 0,
+    coverUrl: dbTrack.coverUrl || "",
+    audioUrl: dbTrack.url,
+    type: dbTrack.type === "podcast" ? "podcast" : "song",
+  };
+}
 
 export default function LikedSongsPage() {
   const playTrack = usePlayerStore((s) => s.playTrack);
+  const [likedTracks, setLikedTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // In a real app, you'd filter based on actual liked status
-  const likedTracks = sampleTracks.slice(0, 3);
+  useEffect(() => {
+    fetch("/api/liked-tracks")
+      .then((res) => {
+        if (res.status === 401) return [];
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const tracks = data.map((item: any) => dbTrackToTrack(item.track));
+          setLikedTracks(tracks);
+        } else {
+          setLikedTracks([]);
+        }
+      })
+      .catch(() => setLikedTracks([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="p-6 lg:p-8">
@@ -19,7 +49,9 @@ export default function LikedSongsPage() {
         <p className="text-muted-foreground mt-1">{likedTracks.length} songs</p>
       </div>
 
-      {likedTracks.length === 0 ? (
+      {loading ? (
+        <div className="flex h-64 items-center justify-center text-muted-foreground">Loading...</div>
+      ) : likedTracks.length === 0 ? (
         <div className="flex h-64 items-center justify-center">
           <div className="text-center">
             <p className="text-muted-foreground text-lg">No liked songs yet</p>
@@ -49,12 +81,8 @@ export default function LikedSongsPage() {
                 </div>
               </div>
               <div className="p-4">
-                <h3 className="mb-1 line-clamp-1 font-semibold">
-                  {track.title}
-                </h3>
-                <p className="text-muted-foreground line-clamp-1 text-sm">
-                  {track.artist}
-                </p>
+                <h3 className="mb-1 line-clamp-1 font-semibold">{track.title}</h3>
+                <p className="text-muted-foreground line-clamp-1 text-sm">{track.artist}</p>
               </div>
             </Card>
           ))}
