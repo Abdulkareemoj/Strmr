@@ -101,6 +101,7 @@ export const auth = betterAuth({
     google: {
       prompt: "select_account",
       clientId: [
+        process.env.GOOGLE_CLIENT_ID as string,
         process.env.GOOGLE_WEB_CLIENT_ID as string,
         process.env.GOOGLE_IOS_CLIENT_ID as string,
         process.env.GOOGLE_ANDROID_CLIENT_ID as string,
