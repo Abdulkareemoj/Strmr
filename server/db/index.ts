@@ -2,14 +2,20 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import * as authSchema from "./schema/auth-schema";
+import * as bookmarkSchema from "./schema/bookmark-schema";
+import * as likedTrackSchema from "./schema/liked-track-schema";
 import * as musicSchema from "./schema/music-schema";
+import * as playlistSchema from "./schema/playlist-schema";
 import * as shortSchema from "./schema/short-schema";
 import * as videoSchema from "./schema/video-schema";
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
 export const schema = {
   ...authSchema,
+  ...bookmarkSchema,
+  ...likedTrackSchema,
   ...musicSchema,
+  ...playlistSchema,
   ...videoSchema,
   ...shortSchema,
 };

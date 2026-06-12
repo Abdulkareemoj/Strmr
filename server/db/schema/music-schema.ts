@@ -14,6 +14,7 @@ export const music = pgTable("music", {
   coverUrl: text("coverUrl"),
   url: text("url").notNull(),
   duration: integer("duration"),
+  type: text("type").notNull().default("song"),
   views: integer("views").notNull().default(0),
   likes: integer("likes").notNull().default(0),
   isPublic: boolean("isPublic").notNull().default(false),
