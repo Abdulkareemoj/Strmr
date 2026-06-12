@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "~/server/db";
-import { video } from "~/server/db/schema/video-schema";
+import { music } from "~/server/db/schema/music-schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "~/server/auth";
 import { headers } from "next/headers";
@@ -9,21 +9,21 @@ import { v4 as uuid } from "uuid";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const type = searchParams.get("type");
 
-    const conditions = [eq(video.isPublic, true)];
-    if (userId) {
-      conditions.push(eq(video.userId, userId));
+    const conditions = [eq(music.isPublic, true)];
+    if (type) {
+      conditions.push(eq(music.type, type));
     }
 
-    const videos = await db
+    const tracks = await db
       .select()
-      .from(video)
+      .from(music)
       .where(and(...conditions))
-      .orderBy(video.createdAt);
-    return NextResponse.json(videos);
+      .orderBy(music.createdAt);
+    return NextResponse.json(tracks);
   } catch (error) {
-    console.error("GET /api/videos error:", error);
+    console.error("GET /api/music error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, url, thumbnail, duration, isPublic } = body;
+    const { title, artist, album, coverUrl, url, duration, isPublic } = body;
 
     if (!title || !url) {
       return NextResponse.json(
@@ -48,23 +48,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const [newVideo] = await db
-      .insert(video)
+    const [newTrack] = await db
+      .insert(music)
       .values({
         id: uuid(),
         title,
-        description,
+        artist: artist ?? null,
+        album: album ?? null,
+        coverUrl: coverUrl ?? null,
         url,
-        thumbnail,
         duration: duration ?? null,
         isPublic: isPublic ?? false,
         userId: session.user.id,
       })
       .returning();
 
-    return NextResponse.json({ video: newVideo });
+    return NextResponse.json({ track: newTrack });
   } catch (error) {
-    console.error("POST /api/videos error:", error);
+    console.error("POST /api/music error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -83,13 +84,13 @@ export async function DELETE(req: NextRequest) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Missing video id" }, { status: 400 });
+      return NextResponse.json({ error: "Missing music id" }, { status: 400 });
     }
 
-    await db.delete(video).where(eq(video.id, id));
-    return NextResponse.json({ message: "Video deleted successfully" });
+    await db.delete(music).where(eq(music.id, id));
+    return NextResponse.json({ message: "Track deleted successfully" });
   } catch (error) {
-    console.error("DELETE /api/videos error:", error);
+    console.error("DELETE /api/music error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
