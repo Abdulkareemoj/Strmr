@@ -1,17 +1,15 @@
 "use client";
-import * as z from "zod";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { z } from "zod";
+import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,20 +22,19 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "~/components/ui/card";
-import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Icons } from "~/components/ui/icons";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Spinner } from "~/components/ui/spinner";
 import { requestPasswordReset } from "~/lib/auth-client";
 
 const forgotPasswordSchema = z.object({
-  email: z.email("Please enter a valid email address"),
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
 });
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -47,7 +44,7 @@ export default function ForgotPassword() {
   });
 
   async function onSubmit(values: ForgotPasswordFormValues) {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     setSuccess(null);
 
@@ -62,84 +59,87 @@ export default function ForgotPassword() {
         return;
       }
 
-      setSuccess("Password reset link sent to your email");
+      setSuccess("Password reset link sent! Check your inbox.");
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Forgot Password</CardTitle>
-          <CardDescription>
-            Enter your email to receive a password reset link
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+    <div className="flex min-h-svh items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Card className="border-none shadow-none sm:border sm:shadow-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Forgot password?</CardTitle>
+            <CardDescription>
+              Enter your email address and we&apos;ll send you a link to reset your password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Request Failed</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {success && (
-            <Alert className="mb-4 border-green-500 text-green-500">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
+            {success && (
+              <Alert>
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertTitle>Check your email</AlertTitle>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="john@example.com"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      We&apos;ll send a password reset link to this email
-                      address
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {!success && (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="m@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Reset Link"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <div className="text-center text-sm">
-            Remember your password?{" "}
-            <Link href="/signin" className="text-primary hover:underline">
-              Sign in
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Spinner data-icon="inline-start" />}
+                    Send reset link
+                  </Button>
+                </form>
+              </Form>
+            )}
+
+            <Link
+              href="/signin"
+              className="text-muted-foreground inline-flex w-full items-center justify-center gap-2 text-sm underline underline-offset-4 hover:text-primary"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              Back to sign in
             </Link>
-          </div>
-        </CardFooter>
-      </Card>
-    </main>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

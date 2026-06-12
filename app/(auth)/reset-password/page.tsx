@@ -4,7 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { z } from "zod";
+import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -22,22 +23,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "~/components/ui/card";
-import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Icons } from "~/components/ui/icons";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Spinner } from "~/components/ui/spinner";
 import { resetPassword } from "~/lib/auth-client";
-import { z } from "zod";
 
 const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number",
-      ),
+      .min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -48,7 +43,7 @@ const resetPasswordSchema = z
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPassword() {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
@@ -66,7 +61,7 @@ export default function ResetPassword() {
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     setSuccess(null);
 
@@ -86,95 +81,103 @@ export default function ResetPassword() {
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset Password</CardTitle>
-          <CardDescription>Enter your new password below</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+    <div className="flex min-h-svh items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Card className="border-none shadow-none sm:border sm:shadow-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Set new password</CardTitle>
+            <CardDescription>
+              Enter your new password below
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Reset Failed</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {success && (
-            <Alert className="mb-4 border-green-500 text-green-500">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
+            {success && (
+              <Alert>
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>New Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter new password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {!success && (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="At least 6 characters"
+                            autoComplete="new-password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm new password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Confirm new password"
+                            autoComplete="new-password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading || !token}
-              >
-                {loading ? (
-                  <>
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    Resetting...
-                  </>
-                ) : (
-                  "Reset Password"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <div className="text-center text-sm">
-            <Link href="/signin" className="text-primary hover:underline">
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading || !token}
+                  >
+                    {isLoading && <Spinner data-icon="inline-start" />}
+                    Reset password
+                  </Button>
+                </form>
+              </Form>
+            )}
+
+            <Link
+              href="/signin"
+              className="text-muted-foreground inline-flex w-full items-center justify-center gap-2 text-sm underline underline-offset-4 hover:text-primary"
+            >
+              <ArrowLeft className="h-3 w-3" />
               Back to sign in
             </Link>
-          </div>
-        </CardFooter>
-      </Card>
-    </main>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

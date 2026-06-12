@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,27 +24,23 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Separator } from "~/components/ui/separator";
 import { Icons } from "~/components/ui/icons";
+import { Spinner } from "~/components/ui/spinner";
 import { signIn } from "~/lib/auth-client";
 
 const signInSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type SignInFormValues = z.infer<typeof signInSchema>;
 
-type LoadingStates = {
-  isLoadingEmail?: boolean;
-  isLoadingGoogle?: boolean;
-  isLoadingDiscord?: boolean;
-};
-
 export default function SignIn() {
-  const [loadingStates, setLoadingStates] = useState({
-    isLoadingEmail: false,
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isDiscordLoading, setIsDiscordLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -57,7 +53,7 @@ export default function SignIn() {
   });
 
   async function onSubmit(values: SignInFormValues) {
-    setLoadingStates({ isLoadingEmail: true });
+    setIsLoading(true);
     setError(null);
 
     try {
@@ -78,111 +74,176 @@ export default function SignIn() {
         err instanceof Error ? err.message : "An unexpected error occurred",
       );
     } finally {
-      setLoadingStates({ isLoadingEmail: false });
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    setError(null);
+
+    try {
+      await signIn.social({
+        provider: "google",
+        callbackURL: "/trending",
+      });
+    } catch (err) {
+      setError("Google sign-in failed. Please try again.");
+      setIsGoogleLoading(false);
+    }
+  }
+  async function handleDiscordSignIn() {
+    setIsDiscordLoading(true);
+    setError(null);
+
+    try {
+      await signIn.social({
+        provider: "discord",
+        callbackURL: "/trending",
+      });
+    } catch (err) {
+      setError("Discord sign-in failed. Please try again.");
+      setIsDiscordLoading(false);
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md border-neutral-800/50 bg-neutral-900/30 backdrop-blur-sm">
-        <CardHeader className="space-y-3">
-          <CardTitle className="text-3xl font-bold text-white">
-            Welcome back
-          </CardTitle>
-          <CardDescription className="text-neutral-400">
-            Sign in to your Strmr account to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert
-              variant="destructive"
-              className="mb-6 border-red-900/50 bg-red-900/20"
-            >
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-red-400">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-neutral-300">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="john@example.com"
-                        className="border-neutral-700 bg-neutral-800/50 text-white placeholder:text-neutral-500"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel className="text-neutral-300">
-                        Password
-                      </FormLabel>
-                      <Link
-                        href="/forgot-password"
-                        className="text-neutral-400 text-sm hover:text-white"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        className="border-neutral-700 bg-neutral-800/50 text-white placeholder:text-neutral-500"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button
-                type="submit"
-                className="w-full bg-white text-black hover:bg-neutral-200 font-semibold"
-                disabled={loadingStates.isLoadingEmail}
+    <div className="flex min-h-svh items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Card className="border-none shadow-none sm:border sm:shadow-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardDescription>
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/signup"
+                className="text-primary font-medium underline underline-offset-4"
               >
-                {loadingStates.isLoadingEmail ? (
-                  <>
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign in"
-                )}
-              </Button>
-            </form>
-          </Form>
+                Sign up
+              </Link>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Sign-in Failed</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <div className="mt-6 text-center text-sm text-neutral-400">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-white hover:text-neutral-300 font-semibold"
-            >
-              Sign up
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </main>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="m@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Password</FormLabel>
+                        <Link
+                          href="/forgot-password"
+                          className="text-muted-foreground text-sm underline underline-offset-4 hover:text-primary"
+                        >
+                          Forgot your password?
+                        </Link>
+                      </div>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && <Spinner data-icon="inline-start" />}
+                  Login
+                </Button>
+              </form>
+            </Form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card text-muted-foreground px-2">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={isLoading || isGoogleLoading}
+                onClick={handleGoogleSignIn}
+              >
+                {isGoogleLoading ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <Icons.google data-icon="inline-start" />
+                )}
+                Continue with Google
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={isLoading || isDiscordLoading}
+                onClick={handleDiscordSignIn}
+              >
+                {isDiscordLoading ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <Icons.discord data-icon="inline-start" />
+                )}
+                Continue with Discord
+              </Button>
+            </div>
+
+            <p className="text-muted-foreground px-6 text-center text-xs">
+              By clicking continue, you agree to our{" "}
+              <Link
+                href="/terms"
+                className="text-primary underline underline-offset-4"
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                className="text-primary underline underline-offset-4"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
